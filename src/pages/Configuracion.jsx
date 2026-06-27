@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
 export default function Configuracion({ perfil, setPerfil, userId }) {
@@ -15,6 +15,9 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [loadingCats, setLoadingCats] = useState(false);
   const [catNueva, setCatNueva] = useState("");
   const [showCats, setShowCats] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(perfil?.logo_url || null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef(null);
 
   async function cargarCategorias() {
     setLoadingCats(true);
@@ -48,6 +51,55 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
     cargarCategorias();
   }
 
+  async function subirLogo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar que sea imagen
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor seleccioná una imagen (JPG, PNG, etc.)");
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      const extension = file.name.split(".").pop();
+      const filePath = `${userId}/logo.${extension}`;
+
+      // Subir a Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("logos")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from("logos")
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl + "?t=" + Date.now();
+
+      // Guardar URL en tabla perfiles
+      const { data, error: updateError } = await supabase
+        .from("perfiles")
+        .update({ logo_url: urlData.publicUrl })
+        .eq("id", userId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      setLogoUrl(publicUrl);
+      setPerfil(data);
+    } catch (err) {
+      alert("Error al subir el logo. Intentá de nuevo.");
+      console.error(err);
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
   const color = form.color_principal;
 
   return (
@@ -57,6 +109,37 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
       {/* Perfil */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
         <h2 className="font-bold text-slate-700 text-sm uppercase tracking-wide">Perfil del negocio</h2>
+
+        {/* Logo */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-2">Logo del negocio</label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden bg-slate-50 flex-shrink-0">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-3xl">🏪</span>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={subirLogo}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingLogo}
+                className="w-full border border-slate-200 text-slate-600 font-medium rounded-xl py-2.5 text-sm hover:bg-slate-50 disabled:opacity-40 transition-all"
+              >
+                {uploadingLogo ? "Subiendo..." : logoUrl ? "📷 Cambiar logo" : "📷 Subir logo"}
+              </button>
+              <p className="text-xs text-slate-400">JPG, PNG o GIF. Máx. 50 MB.</p>
+            </div>
+          </div>
+        </div>
 
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre del negocio</label>
