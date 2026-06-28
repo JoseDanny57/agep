@@ -6,6 +6,9 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
+const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
+const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
+
 export default function Gastos({ perfil, userId }) {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -22,6 +25,8 @@ export default function Gastos({ perfil, userId }) {
   const [uploadingFactura, setUploadingFactura] = useState(false);
   const [facturaUrl, setFacturaUrl] = useState(null);
   const [facturaPreview, setFacturaPreview] = useState(null);
+  const [facturaError, setFacturaError] = useState(null);
+  const [viendoFactura, setViendoFactura] = useState(null);
   const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
@@ -41,6 +46,22 @@ export default function Gastos({ perfil, userId }) {
   async function subirFactura(e) {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Validar tipo
+    if (!TIPOS_VALIDOS_FACTURA.includes(file.type)) {
+      setFacturaError("Formato no válido. Solo se aceptan JPG, PNG, GIF o PDF.");
+      e.target.value = "";
+      return;
+    }
+
+    // Validar tamaño
+    if (file.size > MAX_SIZE_FACTURA) {
+      setFacturaError("El archivo supera el tamaño máximo de 5 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setFacturaError(null);
     setUploadingFactura(true);
     try {
       const extension = file.name.split(".").pop();
@@ -64,6 +85,7 @@ export default function Gastos({ perfil, userId }) {
     setForm({ descripcion: "", monto: "", categoria_id: "", fecha: new Date().toISOString().split("T")[0], tipo: "operativo" });
     setFacturaUrl(null);
     setFacturaPreview(null);
+    setFacturaError(null);
     setShowForm(false);
   }
 
@@ -99,8 +121,26 @@ export default function Gastos({ perfil, userId }) {
     return acc;
   }, {});
 
+  const tipoConfig = {
+    operativo: { emoji: "💼", label: "Gasto operativo", color: "border-blue-500 text-blue-600 bg-blue-50", bg: "#fef2f2" },
+    material:  { emoji: "📦", label: "Compra de material", color: "border-amber-500 text-amber-600 bg-amber-50", bg: "#fef3c7" },
+    activo:    { emoji: "🔧", label: "Compra de activo", color: "border-purple-500 text-purple-600 bg-purple-50", bg: "#f5f3ff" },
+  };
+
   return (
     <div className="space-y-4">
+
+      {/* Modal ver factura */}
+      {viendoFactura && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setViendoFactura(null)}>
+          <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setViendoFactura(null)}
+              className="absolute -top-10 right-0 text-white text-2xl font-bold">✕</button>
+            <img src={viendoFactura} alt="Factura" className="w-full rounded-2xl shadow-xl object-contain max-h-[80vh]" />
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Gastos</h1>
@@ -120,24 +160,27 @@ export default function Gastos({ perfil, userId }) {
           {/* Tipo de egreso */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de egreso</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setForm(f => ({ ...f, tipo: "operativo" }))}
-                className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${form.tipo === "operativo" ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-500"}`}>
-                💼 Gasto operativo
-              </button>
-              <button
-                onClick={() => setForm(f => ({ ...f, tipo: "material" }))}
-                className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${form.tipo === "material" ? "border-amber-500 text-amber-600 bg-amber-50" : "border-slate-200 text-slate-500"}`}>
-                📦 Compra de material
-              </button>
+            <div className="grid grid-cols-3 gap-2">
+              {Object.entries(tipoConfig).map(([key, cfg]) => (
+                <button key={key}
+                  onClick={() => setForm(f => ({ ...f, tipo: key }))}
+                  className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 text-slate-500"}`}>
+                  {cfg.emoji} {cfg.label}
+                </button>
+              ))}
             </div>
+            {form.tipo === "activo" && (
+              <p className="text-[10px] text-purple-400 mt-1.5">Equipos, herramientas o mobiliario — no resta a la utilidad del mes.</p>
+            )}
+            {form.tipo === "material" && (
+              <p className="text-[10px] text-amber-400 mt-1.5">Materias primas e insumos — no resta a la utilidad del mes.</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder={form.tipo === "material" ? "Ej: Tela para vestidos" : "Ej: Pago de electricidad"}
+              placeholder={form.tipo === "material" ? "Ej: Tela para vestidos" : form.tipo === "activo" ? "Ej: Selladora industrial" : "Ej: Pago de electricidad"}
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
 
@@ -166,12 +209,18 @@ export default function Gastos({ perfil, userId }) {
 
           {/* Foto de factura */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-2">Foto de factura (opcional)</label>
-            <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={subirFactura} />
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Foto de factura (opcional)</label>
+            <p className="text-[10px] text-slate-400 mb-2">JPG, PNG, GIF o PDF · Máx. 5 MB</p>
+            <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.gif,.pdf" className="hidden" onChange={subirFactura} />
+            {facturaError && (
+              <p className="text-xs text-red-500 mb-2">⚠️ {facturaError}</p>
+            )}
             {facturaPreview ? (
               <div className="relative">
-                <img src={facturaPreview} alt="Factura" className="w-full h-32 object-cover rounded-xl border border-slate-200" />
-                <button onClick={() => { setFacturaUrl(null); setFacturaPreview(null); }}
+                <img src={facturaPreview} alt="Factura" className="w-full h-24 object-contain rounded-xl border border-slate-200 bg-slate-50 cursor-pointer"
+                  onClick={() => setViendoFactura(facturaPreview)} />
+                <p className="text-[10px] text-slate-400 text-center mt-1">Tocá la imagen para verla completa</p>
+                <button onClick={() => { setFacturaUrl(null); setFacturaPreview(null); setFacturaError(null); }}
                   className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
               </div>
             ) : (
@@ -219,16 +268,20 @@ export default function Gastos({ perfil, userId }) {
                 {items.map((item, idx) => (
                   <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
-                      style={{ backgroundColor: item.tipo === "material" ? "#fef3c7" : "#fef2f2" }}>
-                      {item.tipo === "material" ? "📦" : "💸"}
+                      style={{ backgroundColor: tipoConfig[item.tipo]?.bg || "#fef2f2" }}>
+                      {tipoConfig[item.tipo]?.emoji || "💸"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                      <p className="text-xs text-slate-400 flex items-center gap-1 flex-wrap">
                         {new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}
                         {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px]">Material</span>}
+                        {item.tipo === "activo" && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px]">Activo</span>}
                         {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
-                        {item.factura_url && <a href={item.factura_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-600 text-[10px]">📄 Factura</a>}
+                        {item.factura_url && (
+                          <button onClick={() => setViendoFactura(item.factura_url)}
+                            className="text-blue-400 hover:text-blue-600 text-[10px]">📄 Ver factura</button>
+                        )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
