@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
 function fmt(monto, moneda) {
@@ -11,8 +11,18 @@ export default function Gastos({ perfil, userId }) {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ descripcion: "", monto: "", categoria_id: "", fecha: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({
+    descripcion: "",
+    monto: "",
+    categoria_id: "",
+    fecha: new Date().toISOString().split("T")[0],
+    tipo: "operativo",
+  });
   const [saving, setSaving] = useState(false);
+  const [uploadingFactura, setUploadingFactura] = useState(false);
+  const [facturaUrl, setFacturaUrl] = useState(null);
+  const [facturaPreview, setFacturaPreview] = useState(null);
+  const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
 
@@ -28,6 +38,35 @@ export default function Gastos({ perfil, userId }) {
     setLoading(false);
   }
 
+  async function subirFactura(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingFactura(true);
+    try {
+      const extension = file.name.split(".").pop();
+      const filePath = `${userId}/${Date.now()}.${extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from("facturas")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("facturas").getPublicUrl(filePath);
+      setFacturaUrl(urlData.publicUrl);
+      setFacturaPreview(URL.createObjectURL(file));
+    } catch (err) {
+      alert("Error al subir la factura.");
+      console.error(err);
+    } finally {
+      setUploadingFactura(false);
+    }
+  }
+
+  function resetForm() {
+    setForm({ descripcion: "", monto: "", categoria_id: "", fecha: new Date().toISOString().split("T")[0], tipo: "operativo" });
+    setFacturaUrl(null);
+    setFacturaPreview(null);
+    setShowForm(false);
+  }
+
   async function guardar() {
     if (!form.descripcion || !form.monto) return;
     setSaving(true);
@@ -36,10 +75,11 @@ export default function Gastos({ perfil, userId }) {
       descripcion: form.descripcion,
       monto: Number(form.monto),
       fecha: form.fecha,
+      tipo: form.tipo,
       ...(form.categoria_id ? { categoria_id: form.categoria_id } : {}),
+      ...(facturaUrl ? { factura_url: facturaUrl } : {}),
     });
-    setForm({ descripcion: "", monto: "", categoria_id: "", fecha: new Date().toISOString().split("T")[0] });
-    setShowForm(false);
+    resetForm();
     setSaving(false);
     cargar();
   }
@@ -76,12 +116,31 @@ export default function Gastos({ perfil, userId }) {
       {showForm && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
           <h3 className="font-bold text-slate-800">Nuevo gasto</h3>
+
+          {/* Tipo de egreso */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de egreso</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setForm(f => ({ ...f, tipo: "operativo" }))}
+                className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${form.tipo === "operativo" ? "border-blue-500 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-500"}`}>
+                💼 Gasto operativo
+              </button>
+              <button
+                onClick={() => setForm(f => ({ ...f, tipo: "material" }))}
+                className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${form.tipo === "material" ? "border-amber-500 text-amber-600 bg-amber-50" : "border-slate-200 text-slate-500"}`}>
+                📦 Compra de material
+              </button>
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: Compra de globos"
+              placeholder={form.tipo === "material" ? "Ej: Tela para vestidos" : "Ej: Pago de electricidad"}
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
@@ -95,6 +154,7 @@ export default function Gastos({ perfil, userId }) {
                 value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} />
             </div>
           </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Categoría (opcional)</label>
             <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -103,8 +163,27 @@ export default function Gastos({ perfil, userId }) {
               {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
           </div>
+
+          {/* Foto de factura */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-2">Foto de factura (opcional)</label>
+            <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={subirFactura} />
+            {facturaPreview ? (
+              <div className="relative">
+                <img src={facturaPreview} alt="Factura" className="w-full h-32 object-cover rounded-xl border border-slate-200" />
+                <button onClick={() => { setFacturaUrl(null); setFacturaPreview(null); }}
+                  className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
+              </div>
+            ) : (
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploadingFactura}
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500 disabled:opacity-40 transition-all">
+                {uploadingFactura ? "Subiendo..." : "📷 Adjuntar foto de factura"}
+              </button>
+            )}
+          </div>
+
           <div className="flex gap-3">
-            <button onClick={() => setShowForm(false)}
+            <button onClick={resetForm}
               className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
               Cancelar
             </button>
@@ -139,12 +218,17 @@ export default function Gastos({ perfil, userId }) {
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
                   <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
-                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-sm flex-shrink-0">💸</div>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+                      style={{ backgroundColor: item.tipo === "material" ? "#fef3c7" : "#fef2f2" }}>
+                      {item.tipo === "material" ? "📦" : "💸"}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-400 flex items-center gap-1">
                         {new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}
-                        {item.categorias_gastos && <span className="ml-2 bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
+                        {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px]">Material</span>}
+                        {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
+                        {item.factura_url && <a href={item.factura_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-600 text-[10px]">📄 Factura</a>}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
