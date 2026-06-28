@@ -1,6 +1,9 @@
 import { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
+const TIPOS_VALIDOS_LOGO = ["image/jpeg", "image/png", "image/gif"];
+const MAX_SIZE_LOGO = 2 * 1024 * 1024; // 2 MB
+
 export default function Configuracion({ perfil, setPerfil, userId }) {
   const [form, setForm] = useState({
     nombre_negocio: perfil?.nombre_negocio || "",
@@ -17,6 +20,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [showCats, setShowCats] = useState(false);
   const [logoUrl, setLogoUrl] = useState(perfil?.logo_url || null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState(null);
   const fileInputRef = useRef(null);
 
   async function cargarCategorias() {
@@ -55,32 +59,38 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validar que sea imagen
-    if (!file.type.startsWith("image/")) {
-      alert("Por favor seleccioná una imagen (JPG, PNG, etc.)");
+    // Validar tipo
+    if (!TIPOS_VALIDOS_LOGO.includes(file.type)) {
+      setLogoError("Formato no válido. Solo se aceptan JPG, PNG o GIF.");
+      e.target.value = "";
       return;
     }
 
+    // Validar tamaño
+    if (file.size > MAX_SIZE_LOGO) {
+      setLogoError("El archivo supera el tamaño máximo de 2 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setLogoError(null);
     setUploadingLogo(true);
     try {
       const extension = file.name.split(".").pop();
       const filePath = `${userId}/logo.${extension}`;
 
-      // Subir a Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from("logos")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Obtener URL pública
       const { data: urlData } = supabase.storage
         .from("logos")
         .getPublicUrl(filePath);
 
       const publicUrl = urlData.publicUrl + "?t=" + Date.now();
 
-      // Guardar URL en tabla perfiles
       const { data, error: updateError } = await supabase
         .from("perfiles")
         .update({ logo_url: urlData.publicUrl })
@@ -125,18 +135,21 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.gif"
                 className="hidden"
                 onChange={subirLogo}
               />
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => { setLogoError(null); fileInputRef.current?.click(); }}
                 disabled={uploadingLogo}
                 className="w-full border border-slate-200 text-slate-600 font-medium rounded-xl py-2.5 text-sm hover:bg-slate-50 disabled:opacity-40 transition-all"
               >
                 {uploadingLogo ? "Subiendo..." : logoUrl ? "📷 Cambiar logo" : "📷 Subir logo"}
               </button>
-              <p className="text-xs text-slate-400">JPG, PNG o GIF. Máx. 50 MB.</p>
+              <p className="text-xs text-slate-400">JPG, PNG o GIF · Máx. 2 MB</p>
+              {logoError && (
+                <p className="text-xs text-red-500">⚠️ {logoError}</p>
+              )}
             </div>
           </div>
         </div>
