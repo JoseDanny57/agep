@@ -2,15 +2,15 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const navItems = [
-  { id: "dashboard",    label: "Dashboard",    icon: "📊" },
-  { id: "ingresos",     label: "Ingresos",     icon: "💰" },
-  { id: "gastos",       label: "Gastos",       icon: "💸" },
-  { id: "pedidos",      label: "Pedidos",      icon: "📋" },
-  { id: "inventario",   label: "Inventario",   icon: "📦" },
-  { id: "configuracion",label: "Configuración",icon: "⚙️" },
+  { id: "dashboard",     label: "Dashboard",     icon: "📊" },
+  { id: "ingresos",      label: "Ingresos",      icon: "💰" },
+  { id: "gastos",        label: "Gastos",         icon: "💸" },
+  { id: "pedidos",       label: "Pedidos",        icon: "📋" },
+  { id: "inventario",    label: "Inventario",     icon: "📦" },
+  { id: "configuracion", label: "Configuración",  icon: "⚙️" },
 ];
 
-const bottomNav = ["dashboard", "ingresos", "gastos", "pedidos", "configuracion"];
+const bottomNav = ["dashboard", "ingresos", "gastos", "pedidos", "inventario"];
 
 export default function Layout({ children, page, setPage, perfil }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,7 +82,7 @@ export default function Layout({ children, page, setPage, perfil }) {
         {children}
       </main>
 
-      {/* Bottom navigation */}
+      {/* Bottom navigation — Dashboard, Ingresos, Gastos, Pedidos, Inventario */}
       <nav className="bg-white border-t border-slate-200 sticky bottom-0 z-40">
         <div className="max-w-2xl mx-auto flex">
           {bottomNav.map(id => {
