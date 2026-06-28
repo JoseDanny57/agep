@@ -47,14 +47,12 @@ export default function Gastos({ perfil, userId }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validar tipo
     if (!TIPOS_VALIDOS_FACTURA.includes(file.type)) {
       setFacturaError("Formato no válido. Solo se aceptan JPG, PNG, GIF o PDF.");
       e.target.value = "";
       return;
     }
 
-    // Validar tamaño
     if (file.size > MAX_SIZE_FACTURA) {
       setFacturaError("El archivo supera el tamaño máximo de 5 MB.");
       e.target.value = "";
@@ -122,9 +120,10 @@ export default function Gastos({ perfil, userId }) {
   }, {});
 
   const tipoConfig = {
-    operativo: { emoji: "💼", label: "Gasto operativo", color: "border-blue-500 text-blue-600 bg-blue-50", bg: "#fef2f2" },
-    material:  { emoji: "📦", label: "Compra de material", color: "border-amber-500 text-amber-600 bg-amber-50", bg: "#fef3c7" },
-    activo:    { emoji: "🔧", label: "Compra de activo", color: "border-purple-500 text-purple-600 bg-purple-50", bg: "#f5f3ff" },
+    operativo: { emoji: "💼", label: "Gasto operativo",      color: "border-blue-500 text-blue-600 bg-blue-50",     bg: "#fef2f2" },
+    material:  { emoji: "📦", label: "Compra de material",   color: "border-amber-500 text-amber-600 bg-amber-50",  bg: "#fef3c7" },
+    activo:    { emoji: "🔧", label: "Compra de activo",     color: "border-purple-500 text-purple-600 bg-purple-50", bg: "#f5f3ff" },
+    retiro:    { emoji: "💵", label: "Retiro del propietario", color: "border-green-500 text-green-600 bg-green-50", bg: "#f0fdf4" },
   };
 
   return (
@@ -160,7 +159,7 @@ export default function Gastos({ perfil, userId }) {
           {/* Tipo de egreso */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de egreso</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {Object.entries(tipoConfig).map(([key, cfg]) => (
                 <button key={key}
                   onClick={() => setForm(f => ({ ...f, tipo: key }))}
@@ -175,12 +174,20 @@ export default function Gastos({ perfil, userId }) {
             {form.tipo === "material" && (
               <p className="text-[10px] text-amber-400 mt-1.5">Materias primas e insumos — no resta a la utilidad del mes.</p>
             )}
+            {form.tipo === "retiro" && (
+              <p className="text-[10px] text-green-500 mt-1.5">Salario o retiro del dueño — sí resta a la utilidad del mes.</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder={form.tipo === "material" ? "Ej: Tela para vestidos" : form.tipo === "activo" ? "Ej: Selladora industrial" : "Ej: Pago de electricidad"}
+              placeholder={
+                form.tipo === "material" ? "Ej: Tela para vestidos" :
+                form.tipo === "activo"   ? "Ej: Selladora industrial" :
+                form.tipo === "retiro"   ? "Ej: Salario semana 1" :
+                "Ej: Pago de electricidad"
+              }
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
 
@@ -276,7 +283,8 @@ export default function Gastos({ perfil, userId }) {
                       <p className="text-xs text-slate-400 flex items-center gap-1 flex-wrap">
                         {new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}
                         {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px]">Material</span>}
-                        {item.tipo === "activo" && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px]">Activo</span>}
+                        {item.tipo === "activo"   && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px]">Activo</span>}
+                        {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px]">Retiro</span>}
                         {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
                         {item.factura_url && (
                           <button onClick={() => setViendoFactura(item.factura_url)}
