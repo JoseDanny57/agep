@@ -13,6 +13,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [page, setPage] = useState("dashboard");
 
   useEffect(() => {
@@ -21,13 +22,11 @@ export default function App() {
       if (session) cargarPerfil(session.user.id);
       else setLoading(false);
     });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) cargarPerfil(session.user.id);
       else { setPerfil(null); setLoading(false); }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -39,6 +38,8 @@ export default function App() {
       .single();
     setPerfil(data);
     setLoading(false);
+    setShowSplash(true);
+    setTimeout(() => setShowSplash(false), 2000);
   }
 
   if (loading) {
@@ -54,6 +55,31 @@ export default function App() {
 
   if (!session) return <Login />;
   if (!perfil) return <Onboarding onComplete={(p) => setPerfil(p)} userId={session.user.id} />;
+
+  if (showSplash) {
+    const color = perfil?.color_principal || "#2E75B6";
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center"
+        style={{ backgroundColor: color }}>
+        <div className="text-center animate-pulse">
+          {perfil?.logo_url ? (
+            <img src={perfil.logo_url} alt="Logo"
+              className="w-36 h-36 rounded-3xl object-contain mx-auto mb-6 shadow-2xl bg-white/10 p-2" />
+          ) : (
+            <div className="w-36 h-36 rounded-3xl bg-white/20 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+              <span className="text-6xl">🏪</span>
+            </div>
+          )}
+          <p className="text-white text-2xl font-bold tracking-tight">
+            {perfil?.nombre_negocio || "Mi Negocio"}
+          </p>
+          {perfil?.nombre_propietario && (
+            <p className="text-white/70 text-sm mt-2">{perfil.nombre_propietario}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const pages = { dashboard: Dashboard, ingresos: Ingresos, gastos: Gastos, inventario: Inventario, configuracion: Configuracion };
   const PageComponent = pages[page] || Dashboard;
