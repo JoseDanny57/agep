@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
@@ -16,6 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(false);
   const [page, setPage] = useState("dashboard");
+  const splashMostrado = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -26,11 +27,13 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (session) {
-        const esNuevo = event === "SIGNED_IN";
-        cargarPerfil(session.user.id, esNuevo);
+        // Solo mostrar splash en login nuevo y si no se ha mostrado ya
+        const esLoginNuevo = event === "SIGNED_IN" && !splashMostrado.current;
+        cargarPerfil(session.user.id, esLoginNuevo);
       } else {
         setPerfil(null);
         setLoading(false);
+        splashMostrado.current = false;
       }
     });
     return () => subscription.unsubscribe();
@@ -44,7 +47,8 @@ export default function App() {
       .single();
     setPerfil(data);
     setLoading(false);
-    if (mostrarSplash) {
+    if (mostrarSplash && !splashMostrado.current) {
+      splashMostrado.current = true;
       setShowSplash(true);
       setTimeout(() => setShowSplash(false), 2000);
     }
