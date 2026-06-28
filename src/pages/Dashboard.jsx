@@ -14,28 +14,30 @@ function getMes() {
 }
 
 export default function Dashboard({ perfil, userId }) {
-  const [datos, setDatos] = useState({ ingresos: 0, gastos: 0, stockBajo: [] });
+  const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, stockBajo: [] });
   const [loading, setLoading] = useState(true);
   const mes = getMes();
 
   useEffect(() => { cargar(); }, []);
 
   async function cargar() {
-    const [{ data: ing }, { data: gas }, { data: mat }] = await Promise.all([
+    const [{ data: ing }, { data: gasOp }, { data: gasMat }, { data: mat }] = await Promise.all([
       supabase.from("ingresos").select("monto").eq("user_id", userId).gte("fecha", mes.inicio).lte("fecha", mes.fin),
-      supabase.from("gastos").select("monto").eq("user_id", userId).gte("fecha", mes.inicio).lte("fecha", mes.fin),
+      supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "operativo").gte("fecha", mes.inicio).lte("fecha", mes.fin),
+      supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "material").gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("materiales").select("nombre, stock_actual, stock_minimo").eq("user_id", userId),
     ]);
 
     const totalIng = (ing || []).reduce((s, r) => s + Number(r.monto), 0);
-    const totalGas = (gas || []).reduce((s, r) => s + Number(r.monto), 0);
+    const totalGasOp = (gasOp || []).reduce((s, r) => s + Number(r.monto), 0);
+    const totalGasMat = (gasMat || []).reduce((s, r) => s + Number(r.monto), 0);
     const stockBajo = (mat || []).filter(m => Number(m.stock_actual) <= Number(m.stock_minimo));
 
-    setDatos({ ingresos: totalIng, gastos: totalGas, stockBajo });
+    setDatos({ ingresos: totalIng, gastosOp: totalGasOp, gastosMat: totalGasMat, stockBajo });
     setLoading(false);
   }
 
-  const utilidad = datos.ingresos - datos.gastos;
+  const utilidad = datos.ingresos - datos.gastosOp;
   const margen = datos.ingresos > 0 ? ((utilidad / datos.ingresos) * 100).toFixed(1) : 0;
   const color = perfil?.color_principal || "#2E75B6";
   const moneda = perfil?.moneda || "CRC";
@@ -59,7 +61,7 @@ export default function Dashboard({ perfil, userId }) {
         <p className="text-sm opacity-70 mt-1">Utilidad neta del mes · Margen: {margen}%</p>
       </div>
 
-      {/* Cards ingresos / gastos */}
+      {/* Cards ingresos / gastos operativos */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
@@ -71,11 +73,23 @@ export default function Dashboard({ perfil, userId }) {
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-red-400 text-lg">💸</span>
-            <p className="text-xs font-semibold text-slate-500">GASTOS</p>
+            <p className="text-xs font-semibold text-slate-500">GASTOS OPERATIVOS</p>
           </div>
-          <p className="text-xl font-bold text-slate-800">{fmt(datos.gastos, moneda)}</p>
+          <p className="text-xl font-bold text-slate-800">{fmt(datos.gastosOp, moneda)}</p>
         </div>
       </div>
+
+      {/* Card materiales — solo si hay compras ese mes */}
+      {datos.gastosMat > 0 && (
+        <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100 shadow-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-blue-400 text-lg">📦</span>
+            <p className="text-xs font-semibold text-blue-600">INVERSIÓN EN MATERIALES</p>
+          </div>
+          <p className="text-xl font-bold text-blue-700">{fmt(datos.gastosMat, moneda)}</p>
+          <p className="text-[10px] text-blue-400 mt-1">No resta a la utilidad · Es inversión en inventario</p>
+        </div>
+      )}
 
       {/* Margen visual */}
       {datos.ingresos > 0 && (
@@ -95,7 +109,7 @@ export default function Dashboard({ perfil, userId }) {
       )}
 
       {/* Sin registros */}
-      {datos.ingresos === 0 && datos.gastos === 0 && (
+      {datos.ingresos === 0 && datos.gastosOp === 0 && datos.gastosMat === 0 && (
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
           <p className="text-2xl mb-2">🎯</p>
           <p className="font-semibold text-slate-700 text-sm">¡Empieza a registrar!</p>
