@@ -2,12 +2,15 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: "📊" },
-  { id: "ingresos", label: "Ingresos", icon: "💰" },
-  { id: "gastos", label: "Gastos", icon: "💸" },
-  { id: "inventario", label: "Inventario", icon: "📦" },
-  { id: "configuracion", label: "Configuración", icon: "⚙️" },
+  { id: "dashboard",    label: "Dashboard",    icon: "📊" },
+  { id: "ingresos",     label: "Ingresos",     icon: "💰" },
+  { id: "gastos",       label: "Gastos",       icon: "💸" },
+  { id: "pedidos",      label: "Pedidos",      icon: "📋" },
+  { id: "inventario",   label: "Inventario",   icon: "📦" },
+  { id: "configuracion",label: "Configuración",icon: "⚙️" },
 ];
+
+const bottomNav = ["dashboard", "ingresos", "gastos", "pedidos", "configuracion"];
 
 export default function Layout({ children, page, setPage, perfil }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,25 +85,20 @@ export default function Layout({ children, page, setPage, perfil }) {
       {/* Bottom navigation */}
       <nav className="bg-white border-t border-slate-200 sticky bottom-0 z-40">
         <div className="max-w-2xl mx-auto flex">
-          {navItems.slice(0, 4).map(item => (
-            <button key={item.id}
-              onClick={() => setPage(item.id)}
-              className={`flex-1 flex flex-col items-center py-2.5 gap-0.5 transition-colors ${
-                page === item.id ? "text-blue-600" : "text-slate-400"
-              }`}
-              style={page === item.id ? { color } : {}}>
-              <span className="text-lg">{item.icon}</span>
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
-          ))}
-          <button onClick={() => setPage("configuracion")}
-            className={`flex-1 flex flex-col items-center py-2.5 gap-0.5 transition-colors ${
-              page === "configuracion" ? "text-blue-600" : "text-slate-400"
-            }`}
-            style={page === "configuracion" ? { color } : {}}>
-            <span className="text-lg">⚙️</span>
-            <span className="text-[10px] font-medium">Config</span>
-          </button>
+          {bottomNav.map(id => {
+            const item = navItems.find(n => n.id === id);
+            return (
+              <button key={id}
+                onClick={() => setPage(id)}
+                className={`flex-1 flex flex-col items-center py-2.5 gap-0.5 transition-colors ${
+                  page === id ? "text-blue-600" : "text-slate-400"
+                }`}
+                style={page === id ? { color } : {}}>
+                <span className="text-lg">{item.icon}</span>
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>
