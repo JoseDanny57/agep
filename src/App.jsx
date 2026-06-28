@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Ingresos from "./pages/Ingresos";
 import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
+import Pedidos from "./pages/Pedidos";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
 
@@ -19,18 +20,23 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) cargarPerfil(session.user.id);
+      if (session) cargarPerfil(session.user.id, false);
       else setLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (session) cargarPerfil(session.user.id);
-      else { setPerfil(null); setLoading(false); }
+      if (session) {
+        const esNuevo = event === "SIGNED_IN";
+        cargarPerfil(session.user.id, esNuevo);
+      } else {
+        setPerfil(null);
+        setLoading(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  async function cargarPerfil(userId) {
+  async function cargarPerfil(userId, mostrarSplash = false) {
     const { data } = await supabase
       .from("perfiles")
       .select("*")
@@ -38,8 +44,10 @@ export default function App() {
       .single();
     setPerfil(data);
     setLoading(false);
-    setShowSplash(true);
-    setTimeout(() => setShowSplash(false), 2000);
+    if (mostrarSplash) {
+      setShowSplash(true);
+      setTimeout(() => setShowSplash(false), 2000);
+    }
   }
 
   if (loading) {
@@ -61,7 +69,7 @@ export default function App() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center"
         style={{ backgroundColor: color }}>
-        <div className="text-center animate-pulse">
+        <div className="text-center">
           {perfil?.logo_url ? (
             <img src={perfil.logo_url} alt="Logo"
               className="w-36 h-36 rounded-3xl object-contain mx-auto mb-6 shadow-2xl bg-white/10 p-2" />
@@ -81,7 +89,7 @@ export default function App() {
     );
   }
 
-  const pages = { dashboard: Dashboard, ingresos: Ingresos, gastos: Gastos, inventario: Inventario, configuracion: Configuracion };
+  const pages = { dashboard: Dashboard, ingresos: Ingresos, gastos: Gastos, inventario: Inventario, pedidos: Pedidos, configuracion: Configuracion };
   const PageComponent = pages[page] || Dashboard;
 
   return (
