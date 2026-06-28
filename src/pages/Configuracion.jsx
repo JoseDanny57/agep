@@ -21,6 +21,8 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [logoUrl, setLogoUrl] = useState(perfil?.logo_url || null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoError, setLogoError] = useState(null);
+  const [borrandoDatos, setBorrandoDatos] = useState(false);
+  const [confirmBorrar, setConfirmBorrar] = useState(false);
   const fileInputRef = useRef(null);
 
   async function cargarCategorias() {
@@ -55,18 +57,36 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
     cargarCategorias();
   }
 
+  async function borrarTodosLosDatos() {
+    setBorrandoDatos(true);
+    try {
+      await Promise.all([
+        supabase.from("ingresos").delete().eq("user_id", userId),
+        supabase.from("gastos").delete().eq("user_id", userId),
+        supabase.from("materiales").delete().eq("user_id", userId),
+        supabase.from("categorias_gastos").delete().eq("user_id", userId),
+      ]);
+      setConfirmBorrar(false);
+      setCategorias([]);
+      alert("✓ Todos los datos han sido eliminados. Tu perfil y configuración se mantienen.");
+    } catch (err) {
+      alert("Error al borrar los datos. Intentá de nuevo.");
+      console.error(err);
+    } finally {
+      setBorrandoDatos(false);
+    }
+  }
+
   async function subirLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validar tipo
     if (!TIPOS_VALIDOS_LOGO.includes(file.type)) {
       setLogoError("Formato no válido. Solo se aceptan JPG, PNG o GIF.");
       e.target.value = "";
       return;
     }
 
-    // Validar tamaño
     if (file.size > MAX_SIZE_LOGO) {
       setLogoError("El archivo supera el tamaño máximo de 2 MB.");
       e.target.value = "";
@@ -132,24 +152,15 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
               )}
             </div>
             <div className="flex-1 space-y-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".jpg,.jpeg,.png,.gif"
-                className="hidden"
-                onChange={subirLogo}
-              />
+              <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.gif" className="hidden" onChange={subirLogo} />
               <button
                 onClick={() => { setLogoError(null); fileInputRef.current?.click(); }}
                 disabled={uploadingLogo}
-                className="w-full border border-slate-200 text-slate-600 font-medium rounded-xl py-2.5 text-sm hover:bg-slate-50 disabled:opacity-40 transition-all"
-              >
+                className="w-full border border-slate-200 text-slate-600 font-medium rounded-xl py-2.5 text-sm hover:bg-slate-50 disabled:opacity-40 transition-all">
                 {uploadingLogo ? "Subiendo..." : logoUrl ? "📷 Cambiar logo" : "📷 Subir logo"}
               </button>
               <p className="text-xs text-slate-400">JPG, PNG o GIF · Máx. 2 MB</p>
-              {logoError && (
-                <p className="text-xs text-red-500">⚠️ {logoError}</p>
-              )}
+              {logoError && <p className="text-xs text-red-500">⚠️ {logoError}</p>}
             </div>
           </div>
         </div>
@@ -241,6 +252,33 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Borrar datos */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <h2 className="font-bold text-slate-700 text-sm uppercase tracking-wide mb-1">Zona de peligro</h2>
+        <p className="text-xs text-slate-400 mb-4">Elimina todos tus registros para arrancar en limpio. Tu perfil y configuración se mantienen.</p>
+
+        {!confirmBorrar ? (
+          <button onClick={() => setConfirmBorrar(true)}
+            className="w-full border border-red-200 text-red-500 font-semibold rounded-xl py-3 text-sm hover:bg-red-50 transition-colors">
+            🗑️ Borrar todos mis datos
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-red-600 font-medium text-center">¿Estás seguro? Esta acción no se puede deshacer.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={() => setConfirmBorrar(false)}
+                className="border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+                Cancelar
+              </button>
+              <button onClick={borrarTodosLosDatos} disabled={borrandoDatos}
+                className="bg-red-500 text-white font-semibold rounded-xl py-2.5 text-sm hover:bg-red-600 disabled:opacity-40">
+                {borrandoDatos ? "Borrando..." : "Sí, borrar todo"}
+              </button>
+            </div>
           </div>
         )}
       </div>
