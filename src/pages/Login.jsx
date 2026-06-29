@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 
-export default function Login() {
+export default function Login({ onDemoClick }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,14 +12,12 @@ export default function Login() {
     if (!email || !password) { setError("Completa todos los campos."); return; }
     setLoading(true);
     setError("");
-
     let result;
     if (mode === "login") {
       result = await supabase.auth.signInWithPassword({ email, password });
     } else {
       result = await supabase.auth.signUp({ email, password });
     }
-
     if (result.error) setError(result.error.message);
     setLoading(false);
   }
@@ -41,7 +39,6 @@ export default function Login() {
           <h2 className="text-lg font-bold text-slate-800 mb-5">
             {mode === "login" ? "Bienvenido de vuelta" : "Crear cuenta"}
           </h2>
-
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Correo electrónico</label>
@@ -64,13 +61,11 @@ export default function Login() {
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
                 {error}
               </div>
             )}
-
             <button
               onClick={handleSubmit}
               disabled={loading}
@@ -78,7 +73,6 @@ export default function Login() {
               {loading ? "Cargando..." : mode === "login" ? "Ingresar" : "Registrarme"}
             </button>
           </div>
-
           <div className="mt-5 text-center">
             <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
               className="text-sm text-blue-600 font-medium hover:underline">
@@ -86,6 +80,12 @@ export default function Login() {
             </button>
           </div>
         </div>
+
+        {/* Botón demo */}
+        <button onClick={onDemoClick}
+          className="w-full mt-4 bg-white/10 border border-white/30 text-white font-medium rounded-xl py-3 text-sm hover:bg-white/20 transition-colors backdrop-blur-sm">
+          👀 Ver demo sin registrarme
+        </button>
       </div>
     </div>
   );
