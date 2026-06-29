@@ -11,6 +11,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
     moneda: perfil?.moneda || "CRC",
     tipo_negocio: perfil?.tipo_negocio || "",
     color_principal: perfil?.color_principal || "#2E75B6",
+    valor_hora: perfil?.valor_hora || 1583,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -195,6 +196,15 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
               <option value="pedidos">Pedidos</option>
             </select>
           </div>
+        </div>
+
+        {/* Valor hora mano de obra */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Valor por hora de trabajo ({form.moneda})</label>
+          <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={form.valor_hora}
+            onChange={e => setForm(f => ({ ...f, valor_hora: e.target.value }))} />
+          <p className="text-xs text-slate-400 mt-1">Usado en el Asistente de Costeo · Salario mínimo CR 2025: ₡1,583/hora</p>
         </div>
 
         <div>
