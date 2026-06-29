@@ -12,7 +12,7 @@ export default function Costeo({ perfil, userId }) {
   const [materiales, setMateriales] = useState([]);
   const [items, setItems] = useState([]);
   const [horas, setHoras] = useState("");
-  const [valorHora, setValorHora] = useState("");
+  const [valorHora, setValorHora] = useState(perfil?.valor_hora || 1583);
   const [margen, setMargen] = useState(30);
   const [margenCustom, setMargenCustom] = useState("");
   const [nombreProducto, setNombreProducto] = useState("");
@@ -53,7 +53,7 @@ export default function Costeo({ perfil, userId }) {
   function resetear() {
     setItems([]);
     setHoras("");
-    setValorHora("");
+    setValorHora(perfil?.valor_hora || 1583);
     setMargen(30);
     setMargenCustom("");
     setNombreProducto("");
@@ -168,9 +168,9 @@ export default function Costeo({ perfil, userId }) {
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Valor por hora ({moneda})</label>
             <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="0"
               value={valorHora}
               onChange={e => setValorHora(e.target.value)} />
+            <p className="text-[10px] text-slate-400 mt-1">Configurable en ⚙️ Config</p>
           </div>
         </div>
         {costoManoObra > 0 && (
@@ -192,10 +192,10 @@ export default function Costeo({ perfil, userId }) {
             <button key={m}
               onClick={() => { setMargen(m); setMargenCustom(""); }}
               className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                margenCustom === "" && margen === m ? "border-current text-white" : "border-slate-200 text-slate-500"
+                margenCustom === "" && margen === m ? "text-white" : "border-slate-200 text-slate-500"
               }`}
               style={margenCustom === "" && margen === m ? { backgroundColor: color, borderColor: color } : {}}>
-              {m}%
+              {m}%{m === 30 ? " ★" : ""}
             </button>
           ))}
           <div className="flex items-center gap-1">
@@ -250,7 +250,7 @@ export default function Costeo({ perfil, userId }) {
       )}
 
       {/* Botón resetear */}
-      {(items.length > 0 || horas || valorHora) && (
+      {(items.length > 0 || horas || String(valorHora) !== String(perfil?.valor_hora || 1583)) && (
         <button onClick={resetear}
           className="w-full border border-slate-200 text-slate-500 font-medium rounded-xl py-3 text-sm hover:bg-slate-50">
           🔄 Calcular otro producto
@@ -259,4 +259,3 @@ export default function Costeo({ perfil, userId }) {
     </div>
   );
 }
-
