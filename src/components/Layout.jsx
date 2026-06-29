@@ -7,6 +7,7 @@ const navItems = [
   { id: "gastos",        label: "Gastos",         icon: "💸" },
   { id: "pedidos",       label: "Pedidos",        icon: "📋" },
   { id: "inventario",    label: "Inventario",     icon: "📦" },
+  { id: "costeo",        label: "Costeo",         icon: "🧮" },
   { id: "configuracion", label: "Configuración",  icon: "⚙️" },
 ];
 
@@ -82,7 +83,7 @@ export default function Layout({ children, page, setPage, perfil }) {
         {children}
       </main>
 
-      {/* Bottom navigation — Dashboard, Ingresos, Gastos, Pedidos, Inventario */}
+      {/* Bottom navigation */}
       <nav className="bg-white border-t border-slate-200 sticky bottom-0 z-40">
         <div className="max-w-2xl mx-auto flex">
           {bottomNav.map(id => {
