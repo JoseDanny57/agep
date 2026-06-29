@@ -7,6 +7,7 @@ import Ingresos from "./pages/Ingresos";
 import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
 import Pedidos from "./pages/Pedidos";
+import Costeo from "./pages/Costeo";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
 
@@ -27,7 +28,6 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (session) {
-        // Solo mostrar splash en login nuevo y si no se ha mostrado ya
         const esLoginNuevo = event === "SIGNED_IN" && !splashMostrado.current;
         cargarPerfil(session.user.id, esLoginNuevo);
       } else {
@@ -93,7 +93,15 @@ export default function App() {
     );
   }
 
-  const pages = { dashboard: Dashboard, ingresos: Ingresos, gastos: Gastos, inventario: Inventario, pedidos: Pedidos, configuracion: Configuracion };
+  const pages = {
+    dashboard: Dashboard,
+    ingresos: Ingresos,
+    gastos: Gastos,
+    inventario: Inventario,
+    pedidos: Pedidos,
+    costeo: Costeo,
+    configuracion: Configuracion
+  };
   const PageComponent = pages[page] || Dashboard;
 
   return (
