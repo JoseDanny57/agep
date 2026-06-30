@@ -10,13 +10,7 @@ import Pedidos from "./pages/Pedidos";
 import Costeo from "./pages/Costeo";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
-import DemoLayout from "./components/DemoLayout";
-import DemoDashboard from "./pages/demo/DemoDashboard";
-import DemoIngresos from "./pages/demo/DemoIngresos";
-import DemoGastos from "./pages/demo/DemoGastos";
-import DemoInventario from "./pages/demo/DemoInventario";
-import DemoPedidos from "./pages/demo/DemoPedidos";
-import { demoPerfil } from "./lib/demoData";
+import Demo from "./pages/Demo";
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -25,7 +19,6 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [isDemo, setIsDemo] = useState(false);
-  const [demoPage, setDemoPage] = useState("dashboard");
   const splashMostrado = useRef(false);
 
   useEffect(() => {
@@ -63,21 +56,8 @@ export default function App() {
     }
   }
 
-  // Modo demo
   if (isDemo) {
-    const demoPages = {
-      dashboard: DemoDashboard,
-      ingresos: DemoIngresos,
-      gastos: DemoGastos,
-      inventario: DemoInventario,
-      pedidos: DemoPedidos,
-    };
-    const DemoPage = demoPages[demoPage] || DemoDashboard;
-    return (
-      <DemoLayout page={demoPage} setPage={setDemoPage} perfil={demoPerfil} onExitDemo={() => setIsDemo(false)}>
-        <DemoPage perfil={demoPerfil} />
-      </DemoLayout>
-    );
+    return <Demo onExitDemo={() => setIsDemo(false)} />;
   }
 
   if (loading) {
@@ -91,7 +71,7 @@ export default function App() {
     );
   }
 
-  if (!session) return <Login onDemoClick={() => { setIsDemo(true); setDemoPage("dashboard"); }} />;
+  if (!session) return <Login onDemoClick={() => setIsDemo(true)} />;
   if (!perfil) return <Onboarding onComplete={(p) => setPerfil(p)} userId={session.user.id} />;
 
   if (showSplash) {
