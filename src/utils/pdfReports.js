@@ -9,7 +9,7 @@ import 'jspdf-autotable';
 
 const formatearMonto = (monto, moneda = 'CRC') => {
   const num = Number(monto || 0);
-  const simbolo = moneda === 'USD' ? '$' : '₡';
+  const simbolo = moneda === 'USD' ? '$' : '¢';
   return `${simbolo}${num.toLocaleString('es-CR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
