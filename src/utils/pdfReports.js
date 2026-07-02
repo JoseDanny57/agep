@@ -3,7 +3,7 @@ src/utils/pdfReports.js
 // Requiere: npm install jspdf jspdf-autotable
 
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 
 // ---------- Helpers ----------
 
