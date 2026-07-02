@@ -8,6 +8,7 @@ import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
 import Pedidos from "./pages/Pedidos";
 import Costeo from "./pages/Costeo";
+import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
 import Demo from "./pages/Demo";
@@ -106,6 +107,7 @@ export default function App() {
     inventario: Inventario,
     pedidos: Pedidos,
     costeo: Costeo,
+    reportes: Reportes,
     configuracion: Configuracion
   };
   const PageComponent = pages[page] || Dashboard;
