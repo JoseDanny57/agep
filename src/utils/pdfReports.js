@@ -1,4 +1,4 @@
-src/utils/pdfReports.js
+// src/utils/pdfReports.js
 // AGEP v4 — Generacion de Reportes PDF (100% cliente, sin backend)
 // Requiere: npm install jspdf jspdf-autotable
 
@@ -130,7 +130,7 @@ export async function generarEstadoResultados(datos) {
 
   let y = await dibujarEncabezado(doc, perfil, 'Estado de Resultados', nombreMes(fechaMes));
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: y,
     head: [['Concepto', 'Monto']],
     body: [
@@ -159,7 +159,7 @@ export async function generarEstadoResultados(datos) {
   doc.text('Movimientos informativos (no afectan la utilidad)', 14, y);
   y += 3;
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: y,
     head: [['Tipo', 'Monto']],
     body: [
@@ -182,7 +182,7 @@ export async function generarEstadoResultados(datos) {
     doc.setTextColor(40);
     doc.text('Detalle de Ingresos', 14, y);
     y += 3;
-    autoTable(doc, {
+    doc.autoTable({
       startY: y,
       head: [['Fecha', 'Descripción', 'Monto']],
       body: detalleIngresos.map((r) => [
@@ -206,7 +206,7 @@ export async function generarEstadoResultados(datos) {
     doc.setTextColor(40);
     doc.text('Detalle de Gastos Operativos', 14, y);
     y += 3;
-    autoTable(doc, {
+    doc.autoTable({
       startY: y,
       head: [['Fecha', 'Descripción', 'Monto']],
       body: operativos.map((r) => [
@@ -252,7 +252,7 @@ export async function generarReportePedidos({ perfil, pedidos = [], filtroEstado
     cobrado: 'Cobrado',
   };
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: y,
     head: [['Cliente', 'Descripción', 'Entrega', 'Precio venta', 'Costo mat.', 'Ganancia', 'Estado']],
     body: lista.map((p) => [
@@ -311,8 +311,8 @@ export async function generarReporteInventario({ perfil, materiales = [] }) {
     perfil,
     'Reporte de Inventario',
     bajoMinimo > 0
-      ? `⚠ ${bajoMinimo} material${bajoMinimo > 1 ? 'es' : ''} bajo stock mínimo`
-      : 'Inventario al día'
+      ? `${bajoMinimo} material${bajoMinimo > 1 ? 'es' : ''} bajo stock minimo`
+      : 'Inventario al dia'
   );
 
   const valorTotal = materiales.reduce(
@@ -320,9 +320,9 @@ export async function generarReporteInventario({ perfil, materiales = [] }) {
     0
   );
 
-  autoTable(doc, {
+  doc.autoTable({
     startY: y,
-    head: [['Material', 'Unidad', 'Costo unit.', 'Stock actual', 'Stock mín.', 'Valor en stock']],
+    head: [['Material', 'Unidad', 'Costo unit.', 'Stock actual', 'Stock min.', 'Valor en stock']],
     body: materiales.map((m) => [
       m.nombre,
       m.unidad,
@@ -356,4 +356,3 @@ export async function generarReporteInventario({ perfil, materiales = [] }) {
   dibujarPie(doc);
   doc.save('Reporte_Inventario.pdf');
 }
-
