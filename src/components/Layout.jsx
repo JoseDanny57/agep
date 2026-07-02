@@ -45,7 +45,6 @@ export default function Layout({ children, page, setPage, perfil }) {
           </button>
         </div>
       </header>
-
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="bg-black/40 flex-1" onClick={() => setMenuOpen(false)} />
@@ -76,11 +75,9 @@ export default function Layout({ children, page, setPage, perfil }) {
           </div>
         </div>
       )}
-
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-5">
         {children}
       </main>
-
       <nav className="bg-white border-t border-slate-200 sticky bottom-0 z-40">
         <div className="max-w-2xl mx-auto flex">
           {bottomNav.map(id => {
