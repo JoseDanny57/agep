@@ -1,13 +1,14 @@
 // src/pages/Reportes.jsx
-// AGEP v4 — Pantalla de Reportes PDF
+// AGEP v4 — Pantalla de Reportes PDF con vista previa
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   generarEstadoResultados,
   generarReportePedidos,
   generarReporteInventario,
 } from '../utils/pdfReports';
+import ReportePreview from '../components/ReportePreview';
 
 const MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -22,6 +23,11 @@ export default function Reportes() {
   const [cargando, setCargando] = useState(null); // 'resultados' | 'pedidos' | 'inventario'
   const [error, setError] = useState(null);
 
+  // Vista previa activa
+  const [vista, setVista] = useState(null); // 'resultados' | 'pedidos' | 'inventario' | null
+  const [datosPreview, setDatosPreview] = useState(null);
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
+
   // Anios disponibles: año actual y 2 anteriores
   const aniosDisponibles = [hoy.getFullYear(), hoy.getFullYear() - 1, hoy.getFullYear() - 2];
 
@@ -34,7 +40,7 @@ export default function Reportes() {
     return data;
   };
 
-  // ── Estado de Resultados ──────────────────────────────────────────
+  // ── Estado de Resultados: preparar vista previa ────────────────────
   const handleEstadoResultados = async () => {
     setCargando('resultados');
     setError(null);
@@ -69,9 +75,10 @@ export default function Reportes() {
       const gastosPorTipo = (tipo) =>
         gastosData?.filter((g) => g.tipo === tipo).reduce((acc, g) => acc + Number(g.monto || 0), 0) || 0;
 
-      await generarEstadoResultados({
+      setDatosPreview({
         perfil,
         fechaMes,
+        subtitulo: `${MESES[mes]} ${anio}`,
         ingresos,
         gastosOperativos: gastosPorTipo('operativo'),
         gastosMaterial: gastosPorTipo('material'),
@@ -80,6 +87,7 @@ export default function Reportes() {
         detalleIngresos: ingresosData || [],
         detalleGastos: gastosData || [],
       });
+      setVista('resultados');
     } catch (err) {
       console.error(err);
       setError('No se pudo generar el Estado de Resultados. Intentá de nuevo.');
@@ -88,7 +96,7 @@ export default function Reportes() {
     }
   };
 
-  // ── Reporte de Pedidos ────────────────────────────────────────────
+  // ── Reporte de Pedidos: preparar vista previa ───────────────────────
   const handleReportePedidos = async () => {
     setCargando('pedidos');
     setError(null);
@@ -96,7 +104,6 @@ export default function Reportes() {
       const { data: { user } } = await supabase.auth.getUser();
       const perfil = await obtenerPerfil(user.id);
 
-      // Traer pedidos con sus materiales para calcular costo
       const { data: pedidosData } = await supabase
         .from('pedidos')
         .select(`
@@ -114,7 +121,8 @@ export default function Reportes() {
         ),
       }));
 
-      await generarReportePedidos({ perfil, pedidos, filtroEstado: filtroPedidos });
+      setDatosPreview({ perfil, pedidos, filtroEstado: filtroPedidos });
+      setVista('pedidos');
     } catch (err) {
       console.error(err);
       setError('No se pudo generar el Reporte de Pedidos. Intentá de nuevo.');
@@ -123,7 +131,7 @@ export default function Reportes() {
     }
   };
 
-  // ── Reporte de Inventario ─────────────────────────────────────────
+  // ── Reporte de Inventario: preparar vista previa ────────────────────
   const handleReporteInventario = async () => {
     setCargando('inventario');
     setError(null);
@@ -137,7 +145,8 @@ export default function Reportes() {
         .eq('user_id', user.id)
         .order('nombre', { ascending: true });
 
-      await generarReporteInventario({ perfil, materiales: materiales || [] });
+      setDatosPreview({ perfil, materiales: materiales || [] });
+      setVista('inventario');
     } catch (err) {
       console.error(err);
       setError('No se pudo generar el Reporte de Inventario. Intentá de nuevo.');
@@ -146,14 +155,51 @@ export default function Reportes() {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────
+  // ── Descargar PDF desde la vista previa ─────────────────────────────
+  const handleDescargarPdf = async () => {
+    setDescargandoPdf(true);
+    try {
+      if (vista === 'resultados') {
+        await generarEstadoResultados(datosPreview);
+      } else if (vista === 'pedidos') {
+        await generarReportePedidos(datosPreview);
+      } else if (vista === 'inventario') {
+        await generarReporteInventario(datosPreview);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('No se pudo descargar el PDF. Intentá de nuevo.');
+    } finally {
+      setDescargandoPdf(false);
+    }
+  };
+
+  const cerrarVista = () => {
+    setVista(null);
+    setDatosPreview(null);
+  };
+
+  // ── Render: vista previa activa ─────────────────────────────────────
+  if (vista && datosPreview) {
+    return (
+      <ReportePreview
+        tipo={vista}
+        datos={datosPreview}
+        cargandoPdf={descargandoPdf}
+        onCerrar={cerrarVista}
+        onDescargar={handleDescargarPdf}
+      />
+    );
+  }
+
+  // ── Render: selección de reportes ───────────────────────────────────
   return (
     <div style={{ padding: '16px', maxWidth: '480px', margin: '0 auto' }}>
       <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px', color: '#1a1a2e' }}>
-        Reportes PDF
+        Reportes
       </h2>
       <p style={{ fontSize: '13px', color: '#666', marginBottom: '24px' }}>
-        Descargá reportes listos para compartir o archivar.
+        Mirá tus reportes en pantalla, imprimilos o descargalos en PDF.
       </p>
 
       {error && (
@@ -176,7 +222,6 @@ export default function Reportes() {
           </div>
         </div>
 
-        {/* Selector mes / año */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
           <select
             value={mes}
@@ -203,7 +248,7 @@ export default function Reportes() {
           disabled={cargando !== null}
           style={estilos.boton(cargando === 'resultados')}
         >
-          {cargando === 'resultados' ? 'Generando PDF...' : 'Descargar PDF'}
+          {cargando === 'resultados' ? 'Cargando...' : 'Ver reporte'}
         </button>
       </div>
 
@@ -237,7 +282,7 @@ export default function Reportes() {
           disabled={cargando !== null}
           style={estilos.boton(cargando === 'pedidos')}
         >
-          {cargando === 'pedidos' ? 'Generando PDF...' : 'Descargar PDF'}
+          {cargando === 'pedidos' ? 'Cargando...' : 'Ver reporte'}
         </button>
       </div>
 
@@ -256,12 +301,12 @@ export default function Reportes() {
           disabled={cargando !== null}
           style={{ ...estilos.boton(cargando === 'inventario'), marginTop: '4px' }}
         >
-          {cargando === 'inventario' ? 'Generando PDF...' : 'Descargar PDF'}
+          {cargando === 'inventario' ? 'Cargando...' : 'Ver reporte'}
         </button>
       </div>
 
       <p style={{ fontSize: '11px', color: '#aaa', textAlign: 'center', marginTop: '16px' }}>
-        Los PDFs se descargan directamente en tu dispositivo.
+        Desde la vista previa podés imprimir o descargar el PDF.
       </p>
     </div>
   );
@@ -328,5 +373,3 @@ const estilos = {
     transition: 'background 0.2s',
   }),
 };
-
-
