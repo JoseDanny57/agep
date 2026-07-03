@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import ColorPickerModal from "../components/ColorPickerModal";
 
 const TIPOS_VALIDOS_LOGO = ["image/jpeg", "image/png", "image/gif"];
 const MAX_SIZE_LOGO = 2 * 1024 * 1024; // 2 MB
@@ -24,6 +25,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [logoError, setLogoError] = useState(null);
   const [borrandoDatos, setBorrandoDatos] = useState(false);
   const [confirmBorrar, setConfirmBorrar] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const fileInputRef = useRef(null);
 
   async function cargarCategorias() {
@@ -210,16 +212,25 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1.5">Color de marca</label>
           <div className="flex items-center gap-3">
-            <input type="color" className="w-12 h-10 rounded-xl border border-slate-200 cursor-pointer p-1"
-              value={form.color_principal} onChange={e => setForm(f => ({ ...f, color_principal: e.target.value }))} />
-            <div className="flex gap-2">
+            <button
+              onClick={() => setShowColorPicker(true)}
+              className="w-12 h-10 rounded-xl border border-slate-200"
+              style={{ backgroundColor: form.color_principal }}
+              aria-label="Elegir color personalizado" />
+            <div className="flex gap-2 flex-wrap">
               {["#2E75B6", "#16a34a", "#dc2626", "#7c3aed", "#ea580c", "#0891b2"].map(c => (
                 <button key={c} onClick={() => setForm(f => ({ ...f, color_principal: c }))}
                   className={`w-7 h-7 rounded-full border-2 transition-all ${form.color_principal === c ? "border-slate-800 scale-110" : "border-transparent"}`}
                   style={{ backgroundColor: c }} />
               ))}
             </div>
+            <button
+              onClick={() => setShowColorPicker(true)}
+              className="text-xs font-medium text-slate-500 underline">
+              Personalizado
+            </button>
           </div>
+          <p className="text-xs text-slate-400 mt-1.5 font-mono">{form.color_principal}</p>
         </div>
 
         <button onClick={guardar} disabled={saving}
@@ -298,6 +309,17 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
         className="w-full border border-red-200 text-red-500 font-semibold rounded-xl py-3 text-sm hover:bg-red-50 transition-colors">
         🚪 Cerrar sesión
       </button>
+
+      {showColorPicker && (
+        <ColorPickerModal
+          initialColor={form.color_principal}
+          onClose={() => setShowColorPicker(false)}
+          onSelect={(hex) => {
+            setForm(f => ({ ...f, color_principal: hex }));
+            setShowColorPicker(false);
+          }}
+        />
+      )}
     </div>
   );
 }
