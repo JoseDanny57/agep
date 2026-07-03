@@ -24,7 +24,10 @@ export default function Layout({ children, page, setPage, perfil }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <header
+        className="bg-white border-b border-slate-200 sticky top-0 z-40"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      >
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {perfil?.logo_url ? (
@@ -48,7 +51,13 @@ export default function Layout({ children, page, setPage, perfil }) {
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="bg-black/40 flex-1" onClick={() => setMenuOpen(false)} />
-          <div className="w-64 bg-white flex flex-col shadow-xl">
+          <div
+            className="w-64 bg-white flex flex-col shadow-xl"
+            style={{
+              paddingTop: "env(safe-area-inset-top, 0px)",
+              paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            }}
+          >
             <div className="p-5 border-b border-slate-100" style={{ backgroundColor: color + "15" }}>
               <p className="font-bold text-slate-800">{perfil?.nombre_negocio}</p>
               <p className="text-xs text-slate-500 mt-0.5">{perfil?.nombre_propietario}</p>
@@ -78,7 +87,10 @@ export default function Layout({ children, page, setPage, perfil }) {
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-5">
         {children}
       </main>
-      <nav className="bg-white border-t border-slate-200 sticky bottom-0 z-40">
+      <nav
+        className="bg-white border-t border-slate-200 sticky bottom-0 z-40"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
         <div className="max-w-2xl mx-auto flex">
           {bottomNav.map(id => {
             const item = navItems.find(n => n.id === id);
