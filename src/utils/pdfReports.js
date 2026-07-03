@@ -7,7 +7,7 @@ import 'jspdf-autotable';
 
 // ---------- Helpers ----------
 
-const formatearMonto = (monto, moneda = 'CRC') => {
+export const formatearMonto = (monto, moneda = 'CRC') => {
   const num = Number(monto || 0);
   const simbolo = moneda === 'USD' ? '$' : '¢';
   return `${simbolo}${num.toLocaleString('es-CR', {
@@ -23,7 +23,7 @@ const MESES = [
 
 const nombreMes = (fecha) => `${MESES[fecha.getMonth()]} ${fecha.getFullYear()}`;
 
-const hexToRgb = (hex) => {
+export const hexToRgb = (hex) => {
   const clean = (hex || '2E75B6').replace('#', '');
   const bigint = parseInt(clean, 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
