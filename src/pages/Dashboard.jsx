@@ -13,6 +13,15 @@ function getMes() {
            label: now.toLocaleDateString("es-CR", { month: "long", year: "numeric" }) };
 }
 
+// Aclara un color HEX mezclándolo con blanco según `percent` (0 = sin cambio, 1 = blanco puro)
+function aclararHex(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.round(((num >> 16) & 0xff) + (255 - ((num >> 16) & 0xff)) * percent);
+  const g = Math.round(((num >> 8) & 0xff) + (255 - ((num >> 8) & 0xff)) * percent);
+  const b = Math.round((num & 0xff) + (255 - (num & 0xff)) * percent);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
 export default function Dashboard({ perfil, userId }) {
   const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [] });
   const [loading, setLoading] = useState(true);
@@ -45,11 +54,12 @@ export default function Dashboard({ perfil, userId }) {
   const margen = datos.ingresos > 0 ? ((utilidad / datos.ingresos) * 100).toFixed(1) : 0;
   const color = perfil?.color_principal || "#2E75B6";
   const moneda = perfil?.moneda || "CRC";
+  const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.88)}, ${aclararHex(color, 0.97)})`;
 
   if (loading) return <div className="text-center py-12 text-slate-400">Calculando...</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="-mx-4 -mt-5 px-4 pt-5 pb-6 space-y-4" style={{ backgroundImage: fondoDegradado }}>
       {/* Mes */}
       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider capitalize">{mes.label}</p>
 
