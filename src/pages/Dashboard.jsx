@@ -22,21 +22,22 @@ function aclararHex(hex, percent) {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-export default function Dashboard({ perfil, userId }) {
-  const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [] });
+export default function Dashboard({ perfil, userId, setPage }) {
+  const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [], capitalInicial: 0 });
   const [loading, setLoading] = useState(true);
   const mes = getMes();
 
   useEffect(() => { cargar(); }, []);
 
   async function cargar() {
-    const [{ data: ing }, { data: gasOp }, { data: gasMat }, { data: gasAct }, { data: gasRet }, { data: mat }] = await Promise.all([
+    const [{ data: ing }, { data: gasOp }, { data: gasMat }, { data: gasAct }, { data: gasRet }, { data: mat }, { data: capital }] = await Promise.all([
       supabase.from("ingresos").select("monto").eq("user_id", userId).gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "operativo").gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "material").gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "activo").gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("gastos").select("monto").eq("user_id", userId).eq("tipo", "retiro").gte("fecha", mes.inicio).lte("fecha", mes.fin),
       supabase.from("materiales").select("nombre, stock_actual, stock_minimo").eq("user_id", userId),
+      supabase.from("saldos_iniciales").select("monto").eq("user_id", userId),
     ]);
 
     const totalIng    = (ing    || []).reduce((s, r) => s + Number(r.monto), 0);
@@ -45,8 +46,9 @@ export default function Dashboard({ perfil, userId }) {
     const totalGasAct = (gasAct || []).reduce((s, r) => s + Number(r.monto), 0);
     const totalRetiro = (gasRet || []).reduce((s, r) => s + Number(r.monto), 0);
     const stockBajo   = (mat    || []).filter(m => Number(m.stock_actual) <= Number(m.stock_minimo));
+    const totalCapital = (capital || []).reduce((s, r) => s + Number(r.monto), 0);
 
-    setDatos({ ingresos: totalIng, gastosOp: totalGasOp, gastosMat: totalGasMat, gastosAct: totalGasAct, retiro: totalRetiro, stockBajo });
+    setDatos({ ingresos: totalIng, gastosOp: totalGasOp, gastosMat: totalGasMat, gastosAct: totalGasAct, retiro: totalRetiro, stockBajo, capitalInicial: totalCapital });
     setLoading(false);
   }
 
@@ -91,6 +93,22 @@ export default function Dashboard({ perfil, userId }) {
           </div>
           <p className="text-xl font-bold text-slate-800">{fmt(datos.gastosOp, moneda)}</p>
         </div>
+      </div>
+
+      {/* Card capital inicial — informativa, no afecta la utilidad neta del mes */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">🏦</span>
+            <p className="text-xs font-semibold text-slate-500">CAPITAL INICIAL</p>
+          </div>
+          <p className="text-lg font-bold text-slate-800 truncate">{fmt(datos.capitalInicial, moneda)}</p>
+        </div>
+        <button onClick={() => setPage?.("capital")}
+          className="text-xs font-semibold rounded-lg px-3 py-2 hover:opacity-90 flex-shrink-0"
+          style={{ color, backgroundColor: color + "15" }}>
+          Ver más →
+        </button>
       </div>
 
       {/* Card retiro — solo si hay retiro ese mes */}

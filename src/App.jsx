@@ -8,6 +8,7 @@ import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
 import Pedidos from "./pages/Pedidos";
 import Servicios from "./pages/Servicios";
+import CapitalInicial from "./pages/CapitalInicial";
 import Costeo from "./pages/Costeo";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
@@ -108,6 +109,7 @@ export default function App() {
     inventario: Inventario,
     pedidos: Pedidos,
     servicios: Servicios,
+    capital: CapitalInicial,
     costeo: Costeo,
     reportes: Reportes,
     configuracion: Configuracion
@@ -116,7 +118,7 @@ export default function App() {
 
   return (
     <Layout page={page} setPage={setPage} perfil={perfil}>
-      <PageComponent perfil={perfil} setPerfil={setPerfil} userId={session.user.id} />
+      <PageComponent perfil={perfil} setPerfil={setPerfil} userId={session.user.id} setPage={setPage} />
     </Layout>
   );
 }
