@@ -267,11 +267,11 @@ export default function Pedidos({ perfil, userId }) {
 
           {servicios.length > 0 && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Servicio del catálogo (opcional)</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Artículo del catálogo (opcional)</label>
               <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={form.servicio_id}
                 onChange={e => elegirServicio(e.target.value)}>
-                <option value="">Seleccionar servicio...</option>
+                <option value="">Seleccionar artículo...</option>
                 {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
               </select>
               <p className="text-[10px] text-slate-400 mt-1">Autocompleta descripción, precio y materiales</p>
