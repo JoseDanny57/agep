@@ -8,6 +8,7 @@ const navItems = [
   { id: "pedidos",       label: "Pedidos",        icon: "📋" },
   { id: "servicios",     label: "Catálogo de Artículos", icon: "🧾" },
   { id: "inventario",    label: "Inventario",     icon: "📦" },
+  { id: "capital",       label: "Capital Inicial", icon: "🏦" },
   { id: "costeo",        label: "Costeo",         icon: "🧮" },
   { id: "reportes",      label: "Reportes PDF",   icon: "📄" },
   { id: "configuracion", label: "Configuración",  icon: "⚙️" },
