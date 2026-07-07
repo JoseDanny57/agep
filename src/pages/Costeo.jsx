@@ -37,6 +37,9 @@ export default function Costeo({ perfil, userId }) {
     setItems(prev => prev.map((item, i) => {
       if (i !== idx) return item;
       if (campo === "material_id") {
+        if (valor === "__manual__") {
+          return { ...item, material_id: "__manual__", nombre_material: "", costo_unitario: "" };
+        }
         const mat = materiales.find(m => m.id === valor);
         return mat
           ? { ...item, material_id: mat.id, nombre_material: mat.nombre, costo_unitario: mat.costo_unitario }
