@@ -7,6 +7,7 @@ import Ingresos from "./pages/Ingresos";
 import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
 import Pedidos from "./pages/Pedidos";
+import Servicios from "./pages/Servicios";
 import Costeo from "./pages/Costeo";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
@@ -106,6 +107,7 @@ export default function App() {
     gastos: Gastos,
     inventario: Inventario,
     pedidos: Pedidos,
+    servicios: Servicios,
     costeo: Costeo,
     reportes: Reportes,
     configuracion: Configuracion

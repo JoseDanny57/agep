@@ -6,27 +6,17 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
-const ESTADOS = {
-  pendiente:   { label: "Pendiente",   color: "bg-amber-100 text-amber-700",   emoji: "🕐" },
-  en_proceso:  { label: "En proceso",  color: "bg-blue-100 text-blue-700",     emoji: "⚙️" },
-  entregado:   { label: "Entregado",   color: "bg-purple-100 text-purple-700", emoji: "📦" },
-  cobrado:     { label: "Cobrado",     color: "bg-green-100 text-green-700",   emoji: "✅" },
-};
-
-export default function Pedidos({ perfil, userId }) {
-  const [pedidos, setPedidos] = useState([]);
-  const [materiales, setMateriales] = useState([]);
+export default function Servicios({ perfil, userId }) {
   const [servicios, setServicios] = useState([]);
+  const [materiales, setMateriales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [pedidoAbierto, setPedidoAbierto] = useState(null);
+  const [servicioAbierto, setServicioAbierto] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
-    cliente: "",
-    servicio_id: "",
+    nombre: "",
     descripcion: "",
-    fecha_entrega: "",
     precio_venta: "",
   });
 
@@ -38,50 +28,25 @@ export default function Pedidos({ perfil, userId }) {
   useEffect(() => { cargar(); }, []);
 
   async function cargar() {
-    const [{ data: p }, { data: m }, { data: s }] = await Promise.all([
-      supabase.from("pedidos")
-        .select("*, pedido_materiales(*)")
+    const [{ data: s }, { data: m }] = await Promise.all([
+      supabase.from("servicios")
+        .select("*, servicio_materiales(*)")
         .eq("user_id", userId)
         .order("creado_en", { ascending: false }),
       supabase.from("materiales")
         .select("id, nombre, costo_unitario, unidad")
         .eq("user_id", userId)
         .order("nombre"),
-      supabase.from("servicios")
-        .select("*, servicio_materiales(*)")
-        .eq("user_id", userId)
-        .order("nombre"),
     ]);
-    setPedidos(p || []);
-    setMateriales(m || []);
     setServicios(s || []);
+    setMateriales(m || []);
     setLoading(false);
   }
 
   function resetForm() {
-    setForm({ cliente: "", servicio_id: "", descripcion: "", fecha_entrega: "", precio_venta: "" });
+    setForm({ nombre: "", descripcion: "", precio_venta: "" });
     setItemsMaterial([]);
     setShowForm(false);
-  }
-
-  function elegirServicio(servicioId) {
-    const s = servicios.find(sv => sv.id === servicioId);
-    if (!s) {
-      setForm(f => ({ ...f, servicio_id: "" }));
-      return;
-    }
-    setForm(f => ({
-      ...f,
-      servicio_id: s.id,
-      descripcion: s.descripcion || s.nombre,
-      precio_venta: s.precio_venta != null ? String(s.precio_venta) : f.precio_venta,
-    }));
-    setItemsMaterial((s.servicio_materiales || []).map(m => ({
-      material_id: m.material_id || "",
-      nombre_material: m.nombre_material,
-      cantidad: String(m.cantidad),
-      costo_unitario: String(m.costo_unitario),
-    })));
   }
 
   function agregarMaterial() {
@@ -113,16 +78,14 @@ export default function Pedidos({ perfil, userId }) {
   }
 
   async function guardar() {
-    if (!form.cliente) return;
+    if (!form.nombre) return;
     setSaving(true);
     try {
-      const { data: pedido, error } = await supabase.from("pedidos").insert({
+      const { data: servicio, error } = await supabase.from("servicios").insert({
         user_id: userId,
-        cliente: form.cliente,
+        nombre: form.nombre,
         descripcion: form.descripcion,
-        fecha_entrega: form.fecha_entrega || null,
         precio_venta: Number(form.precio_venta) || null,
-        estado: "pendiente",
       }).select().single();
 
       if (error) throw error;
@@ -131,35 +94,29 @@ export default function Pedidos({ perfil, userId }) {
         const filas = itemsMaterial
           .filter(i => i.nombre_material && i.cantidad)
           .map(i => ({
-            pedido_id: pedido.id,
+            servicio_id: servicio.id,
             material_id: i.material_id || null,
             nombre_material: i.nombre_material,
             cantidad: Number(i.cantidad),
             costo_unitario: Number(i.costo_unitario) || 0,
           }));
-        if (filas.length > 0) await supabase.from("pedido_materiales").insert(filas);
+        if (filas.length > 0) await supabase.from("servicio_materiales").insert(filas);
       }
 
       resetForm();
       cargar();
     } catch (err) {
-      alert("Error al guardar el pedido.");
+      alert("Error al guardar el servicio.");
       console.error(err);
     } finally {
       setSaving(false);
     }
   }
 
-  async function cambiarEstado(id, estado) {
-    await supabase.from("pedidos").update({ estado }).eq("id", id);
-    cargar();
-    if (pedidoAbierto?.id === id) setPedidoAbierto(p => ({ ...p, estado }));
-  }
-
   async function eliminar(id) {
-    if (!confirm("¿Eliminar este pedido?")) return;
-    await supabase.from("pedidos").delete().eq("id", id);
-    setPedidoAbierto(null);
+    if (!confirm("¿Eliminar este servicio del catálogo?")) return;
+    await supabase.from("servicios").delete().eq("id", id);
+    setServicioAbierto(null);
     cargar();
   }
 
@@ -168,51 +125,36 @@ export default function Pedidos({ perfil, userId }) {
 
   if (loading) return <div className="text-center py-12 text-slate-400">Cargando...</div>;
 
-  // Vista detalle de pedido
-  if (pedidoAbierto) {
-    const p = pedidoAbierto;
-    const costoP = (p.pedido_materiales || []).reduce((s, m) => s + (Number(m.cantidad) * Number(m.costo_unitario)), 0);
-    const ganancia = (p.precio_venta || 0) - costoP;
-    const est = ESTADOS[p.estado] || ESTADOS.pendiente;
+  // Vista detalle de servicio
+  if (servicioAbierto) {
+    const s = servicioAbierto;
+    const costoS = (s.servicio_materiales || []).reduce((sum, m) => sum + (Number(m.cantidad) * Number(m.costo_unitario)), 0);
+    const ganancia = (s.precio_venta || 0) - costoS;
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => setPedidoAbierto(null)} className="text-slate-400 hover:text-slate-600 text-xl">←</button>
-          <h1 className="text-xl font-bold text-slate-800 flex-1">{p.cliente}</h1>
-          <button onClick={() => eliminar(p.id)} className="text-slate-300 hover:text-red-400 text-sm">🗑️</button>
-        </div>
-
-        {/* Estado */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-          <p className="text-xs font-semibold text-slate-500 mb-3">ESTADO DEL PEDIDO</p>
-          <div className="grid grid-cols-2 gap-2">
-            {Object.entries(ESTADOS).map(([key, cfg]) => (
-              <button key={key} onClick={() => cambiarEstado(p.id, key)}
-                className={`py-2 rounded-xl text-xs font-medium border-2 transition-all ${p.estado === key ? "border-current " + cfg.color : "border-slate-200 text-slate-400"}`}>
-                {cfg.emoji} {cfg.label}
-              </button>
-            ))}
-          </div>
+          <button onClick={() => setServicioAbierto(null)} className="text-slate-400 hover:text-slate-600 text-xl">←</button>
+          <h1 className="text-xl font-bold text-slate-800 flex-1">{s.nombre}</h1>
+          <button onClick={() => eliminar(s.id)} className="text-slate-300 hover:text-red-400 text-sm">🗑️</button>
         </div>
 
         {/* Info */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2">
-          {p.descripcion && <p className="text-sm text-slate-600">{p.descripcion}</p>}
-          {p.fecha_entrega && (
-            <p className="text-xs text-slate-400">📅 Entrega: {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>
-          )}
-        </div>
+        {s.descripcion && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+            <p className="text-sm text-slate-600">{s.descripcion}</p>
+          </div>
+        )}
 
         {/* Financiero */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
           <p className="text-xs font-semibold text-slate-500">RESUMEN FINANCIERO</p>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Precio de venta</span>
-            <span className="font-bold text-slate-800">{p.precio_venta ? fmt(p.precio_venta, moneda) : "—"}</span>
+            <span className="font-bold text-slate-800">{s.precio_venta ? fmt(s.precio_venta, moneda) : "—"}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Costo de materiales</span>
-            <span className="font-bold text-red-500">{fmt(costoP, moneda)}</span>
+            <span className="font-bold text-red-500">{fmt(costoS, moneda)}</span>
           </div>
           <div className="border-t border-slate-100 pt-2 flex justify-between text-sm">
             <span className="font-semibold text-slate-700">Ganancia estimada</span>
@@ -221,11 +163,11 @@ export default function Pedidos({ perfil, userId }) {
         </div>
 
         {/* Materiales */}
-        {(p.pedido_materiales || []).length > 0 && (
+        {(s.servicio_materiales || []).length > 0 && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <p className="text-xs font-semibold text-slate-500 px-4 pt-4 pb-2">MATERIALES</p>
-            {p.pedido_materiales.map((m, idx) => (
-              <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < p.pedido_materiales.length - 1 ? "border-b border-slate-50" : ""}`}>
+            {s.servicio_materiales.map((m, idx) => (
+              <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < s.servicio_materiales.length - 1 ? "border-b border-slate-50" : ""}`}>
                 <div>
                   <p className="text-sm font-medium text-slate-800">{m.nombre_material}</p>
                   <p className="text-xs text-slate-400">{m.cantidad} × {fmt(m.costo_unitario, moneda)}</p>
@@ -243,8 +185,8 @@ export default function Pedidos({ perfil, userId }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Pedidos</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{pedidos.length} pedido{pedidos.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-xl font-bold text-slate-800">Catálogo de Servicios</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{servicios.length} servicio{servicios.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={() => setShowForm(true)}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
@@ -253,50 +195,30 @@ export default function Pedidos({ perfil, userId }) {
         </button>
       </div>
 
-      {/* Formulario nuevo pedido */}
+      {/* Formulario nuevo servicio */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-          <h3 className="font-bold text-slate-800">Nuevo pedido</h3>
+          <h3 className="font-bold text-slate-800">Nuevo servicio</h3>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Cliente *</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre *</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Nombre del cliente"
-              value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} />
+              placeholder="Ej: Arreglo de globos cumpleaños"
+              value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
           </div>
-
-          {servicios.length > 0 && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Servicio del catálogo (opcional)</label>
-              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                value={form.servicio_id}
-                onChange={e => elegirServicio(e.target.value)}>
-                <option value="">Seleccionar servicio...</option>
-                {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
-              </select>
-              <p className="text-[10px] text-slate-400 mt-1">Autocompleta descripción, precio y materiales</p>
-            </div>
-          )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción (opcional)</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ej: Arreglo de globos azul y blanco"
+              placeholder="Ej: Incluye 12 globos, base y cinta decorativa"
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Precio de venta ({moneda})</label>
-              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="0"
-                value={form.precio_venta} onChange={e => setForm(f => ({ ...f, precio_venta: e.target.value }))} />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha de entrega</label>
-              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={form.fecha_entrega} onChange={e => setForm(f => ({ ...f, fecha_entrega: e.target.value }))} />
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Precio de venta ({moneda})</label>
+            <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0"
+              value={form.precio_venta} onChange={e => setForm(f => ({ ...f, precio_venta: e.target.value }))} />
           </div>
 
           {/* Materiales */}
@@ -357,7 +279,7 @@ export default function Pedidos({ perfil, userId }) {
               className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={guardar} disabled={saving || !form.cliente}
+            <button onClick={guardar} disabled={saving || !form.nombre}
               className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
               style={{ backgroundColor: color }}>
               {saving ? "Guardando..." : "Guardar"}
@@ -366,34 +288,29 @@ export default function Pedidos({ perfil, userId }) {
         </div>
       )}
 
-      {/* Lista de pedidos */}
-      {pedidos.length === 0 ? (
+      {/* Lista de servicios */}
+      {servicios.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-4xl mb-3">📋</p>
-          <p className="font-semibold text-slate-600">Sin pedidos registrados</p>
-          <p className="text-sm text-slate-400 mt-1">Creá tu primer pedido.</p>
+          <p className="text-4xl mb-3">🧾</p>
+          <p className="font-semibold text-slate-600">Sin servicios registrados</p>
+          <p className="text-sm text-slate-400 mt-1">Creá tu primer servicio del catálogo.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          {pedidos.map((p, idx) => {
-            const costoP = (p.pedido_materiales || []).reduce((s, m) => s + (Number(m.cantidad) * Number(m.costo_unitario)), 0);
-            const ganancia = (p.precio_venta || 0) - costoP;
-            const est = ESTADOS[p.estado] || ESTADOS.pendiente;
+          {servicios.map((s, idx) => {
+            const costoS = (s.servicio_materiales || []).reduce((sum, m) => sum + (Number(m.cantidad) * Number(m.costo_unitario)), 0);
+            const ganancia = (s.precio_venta || 0) - costoS;
             return (
-              <div key={p.id}
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 ${idx < pedidos.length - 1 ? "border-b border-slate-50" : ""}`}
-                onClick={() => setPedidoAbierto(p)}>
+              <div key={s.id}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 ${idx < servicios.length - 1 ? "border-b border-slate-50" : ""}`}
+                onClick={() => setServicioAbierto(s)}>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-medium text-slate-800 text-sm truncate">{p.cliente}</p>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${est.color}`}>{est.emoji} {est.label}</span>
-                  </div>
-                  {p.descripcion && <p className="text-xs text-slate-400 truncate">{p.descripcion}</p>}
-                  {p.fecha_entrega && <p className="text-xs text-slate-400">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
+                  <p className="font-medium text-slate-800 text-sm truncate">{s.nombre}</p>
+                  {s.descripcion && <p className="text-xs text-slate-400 truncate">{s.descripcion}</p>}
                 </div>
                 <div className="text-right flex-shrink-0">
-                  {p.precio_venta && <p className="text-sm font-bold text-slate-800">{fmt(p.precio_venta, moneda)}</p>}
-                  {p.precio_venta && costoP > 0 && (
+                  {s.precio_venta && <p className="text-sm font-bold text-slate-800">{fmt(s.precio_venta, moneda)}</p>}
+                  {s.precio_venta && costoS > 0 && (
                     <p className={`text-xs font-medium ${ganancia >= 0 ? "text-green-500" : "text-red-500"}`}>
                       {ganancia >= 0 ? "+" : ""}{fmt(ganancia, moneda)}
                     </p>
@@ -408,4 +325,3 @@ export default function Pedidos({ perfil, userId }) {
     </div>
   );
 }
-
