@@ -54,12 +54,12 @@ export default function Dashboard({ perfil, userId }) {
   const margen = datos.ingresos > 0 ? ((utilidad / datos.ingresos) * 100).toFixed(1) : 0;
   const color = perfil?.color_principal || "#2E75B6";
   const moneda = perfil?.moneda || "CRC";
-  const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.88)}, ${aclararHex(color, 0.97)})`;
+  const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.5)}, ${aclararHex(color, 0.97)})`;
 
   if (loading) return <div className="text-center py-12 text-slate-400">Calculando...</div>;
 
   return (
-    <div className="-mx-4 -mt-5 px-4 pt-5 pb-6 space-y-4" style={{ backgroundImage: fondoDegradado }}>
+    <div className="-mx-4 -mt-5 px-4 pt-5 pb-6 space-y-4" style={{ backgroundImage: fondoDegradado, minHeight: "100vh" }}>
       {/* Mes */}
       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider capitalize">{mes.label}</p>
 
