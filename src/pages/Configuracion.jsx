@@ -63,11 +63,28 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   async function borrarTodosLosDatos() {
     setBorrandoDatos(true);
     try {
+      // pedido_materiales / servicio_materiales no tienen user_id propio (solo pedido_id / servicio_id),
+      // así que hay que borrarlas primero usando los IDs del usuario, antes que sus tablas padre.
+      const [{ data: pedidosData }, { data: serviciosData }] = await Promise.all([
+        supabase.from("pedidos").select("id").eq("user_id", userId),
+        supabase.from("servicios").select("id").eq("user_id", userId),
+      ]);
+      const pedidoIds = (pedidosData || []).map(p => p.id);
+      const servicioIds = (serviciosData || []).map(s => s.id);
+
       await Promise.all([
+        pedidoIds.length > 0 ? supabase.from("pedido_materiales").delete().in("pedido_id", pedidoIds) : null,
+        servicioIds.length > 0 ? supabase.from("servicio_materiales").delete().in("servicio_id", servicioIds) : null,
+      ]);
+
+      await Promise.all([
+        supabase.from("pedidos").delete().eq("user_id", userId),
+        supabase.from("servicios").delete().eq("user_id", userId),
         supabase.from("ingresos").delete().eq("user_id", userId),
         supabase.from("gastos").delete().eq("user_id", userId),
         supabase.from("materiales").delete().eq("user_id", userId),
         supabase.from("categorias_gastos").delete().eq("user_id", userId),
+        supabase.from("saldos_iniciales").delete().eq("user_id", userId),
       ]);
       setConfirmBorrar(false);
       setCategorias([]);
