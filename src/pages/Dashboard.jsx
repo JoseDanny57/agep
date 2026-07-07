@@ -54,7 +54,7 @@ export default function Dashboard({ perfil, userId }) {
   const margen = datos.ingresos > 0 ? ((utilidad / datos.ingresos) * 100).toFixed(1) : 0;
   const color = perfil?.color_principal || "#2E75B6";
   const moneda = perfil?.moneda || "CRC";
-  const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.5)}, ${aclararHex(color, 0.97)})`;
+  const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.25)}, ${aclararHex(color, 0.97)})`;
 
   if (loading) return <div className="text-center py-12 text-slate-400">Calculando...</div>;
 
