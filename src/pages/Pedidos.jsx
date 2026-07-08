@@ -197,6 +197,19 @@ export default function Pedidos({ perfil, userId }) {
     }
   }
 
+  async function verificarAutoCobrado(id) {
+    const { data } = await supabase.from("pedidos")
+      .select("precio_venta, estado, pedido_pagos(monto)")
+      .eq("id", id)
+      .single();
+    if (!data || data.estado !== "entregado") return;
+    const totalPagos = (data.pedido_pagos || []).reduce((s, pg) => s + Number(pg.monto), 0);
+    const saldo = Math.round((Number(data.precio_venta || 0) - totalPagos) * 100) / 100;
+    if (saldo === 0) {
+      await supabase.from("pedidos").update({ estado: "cobrado" }).eq("id", id);
+    }
+  }
+
   function abrirNuevoPago() {
     setPagoEditId(null);
     setPagoForm({ monto: "", metodo_pago: "efectivo", fecha: hoyISO(), nota: "" });
@@ -237,6 +250,7 @@ export default function Pedidos({ perfil, userId }) {
         if (error) throw error;
       }
       cerrarPagoForm();
+      await verificarAutoCobrado(pedidoAbierto.id);
       await refrescarPedido(pedidoAbierto.id);
     } catch (err) {
       alert("Error al guardar el pago.");
@@ -286,6 +300,7 @@ export default function Pedidos({ perfil, userId }) {
       if (errPago) throw errPago;
 
       setShowTraslado(false);
+      await verificarAutoCobrado(pedidoAbierto.id);
       await refrescarPedido(pedidoAbierto.id);
     } catch (err) {
       alert("Error al trasladar el saldo a Ingresos.");
