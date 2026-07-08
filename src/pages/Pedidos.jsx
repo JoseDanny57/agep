@@ -6,6 +6,10 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
+function fmtSaldoFavor(montoAbsoluto, moneda) {
+  return `(${fmt(montoAbsoluto, moneda)})`;
+}
+
 const ESTADOS = {
   pendiente:   { label: "Pendiente",   color: "bg-amber-100 text-amber-700",   emoji: "🕐" },
   en_proceso:  { label: "En proceso",  color: "bg-blue-100 text-blue-700",     emoji: "⚙️" },
@@ -374,7 +378,7 @@ export default function Pedidos({ perfil, userId }) {
               style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
               <h3 className="font-bold text-slate-800">Trasladar saldo a Ingresos</h3>
               <p className="text-sm text-slate-500">
-                Saldo a favor disponible: <span className="font-bold text-amber-600">{fmt(saldoFavor, moneda)}</span>
+                Saldo a favor disponible: <span className="font-bold text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </p>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto a trasladar ({moneda})</label>
@@ -459,7 +463,7 @@ export default function Pedidos({ perfil, userId }) {
             {saldoPendiente < 0 && (
               <>
                 <span className="font-semibold text-slate-700">Saldo a favor del cliente</span>
-                <span className="font-bold text-lg text-amber-600">{fmt(saldoFavor, moneda)}</span>
+                <span className="font-bold text-lg text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </>
             )}
             {saldoPendiente === 0 && (
