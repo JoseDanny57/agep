@@ -7,6 +7,7 @@ import Ingresos from "./pages/Ingresos";
 import Gastos from "./pages/Gastos";
 import Inventario from "./pages/Inventario";
 import Pedidos from "./pages/Pedidos";
+import CuentasPorCobrar from "./pages/CuentasPorCobrar";
 import Servicios from "./pages/Servicios";
 import CapitalInicial from "./pages/CapitalInicial";
 import Costeo from "./pages/Costeo";
@@ -21,6 +22,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(false);
   const [page, setPage] = useState("dashboard");
+  const [pedidoInicialId, setPedidoInicialId] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
   const splashMostrado = useRef(false);
 
@@ -108,6 +110,7 @@ export default function App() {
     gastos: Gastos,
     inventario: Inventario,
     pedidos: Pedidos,
+    cuentasPorCobrar: CuentasPorCobrar,
     servicios: Servicios,
     capital: CapitalInicial,
     costeo: Costeo,
@@ -116,9 +119,22 @@ export default function App() {
   };
   const PageComponent = pages[page] || Dashboard;
 
+  function irAPedido(id) {
+    setPedidoInicialId(id);
+    setPage("pedidos");
+  }
+
   return (
     <Layout page={page} setPage={setPage} perfil={perfil}>
-      <PageComponent perfil={perfil} setPerfil={setPerfil} userId={session.user.id} setPage={setPage} />
+      <PageComponent
+        perfil={perfil}
+        setPerfil={setPerfil}
+        userId={session.user.id}
+        setPage={setPage}
+        pedidoInicialId={pedidoInicialId}
+        limpiarPedidoInicial={() => setPedidoInicialId(null)}
+        onSeleccionarPedido={irAPedido}
+      />
     </Layout>
   );
 }
