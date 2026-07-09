@@ -6,6 +6,7 @@ const navItems = [
   { id: "ingresos",      label: "Ingresos",      icon: "💰" },
   { id: "gastos",        label: "Gastos",         icon: "💸" },
   { id: "pedidos",       label: "Pedidos",        icon: "📋" },
+  { id: "cuentasPorCobrar", label: "Cuentas por Cobrar", icon: "💳" },
   { id: "servicios",     label: "Catálogo de Artículos", icon: "🧾" },
   { id: "inventario",    label: "Inventario",     icon: "📦" },
   { id: "capital",       label: "Capital Inicial", icon: "🏦" },

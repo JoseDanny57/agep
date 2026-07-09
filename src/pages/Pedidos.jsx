@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { calcularSaldoPendiente } from "../utils/saldoPedido";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -27,7 +28,7 @@ function hoyISO() {
   return new Date().toISOString().split("T")[0];
 }
 
-export default function Pedidos({ perfil, userId }) {
+export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedidoInicial }) {
   const [pedidos, setPedidos] = useState([]);
   const [materiales, setMateriales] = useState([]);
   const [servicios, setServicios] = useState([]);
@@ -59,6 +60,13 @@ export default function Pedidos({ perfil, userId }) {
   const color = perfil?.color_principal || "#2E75B6";
 
   useEffect(() => { cargar(); }, []);
+
+  useEffect(() => {
+    if (!pedidoInicialId || pedidos.length === 0) return;
+    const p = pedidos.find(x => x.id === pedidoInicialId);
+    if (p) setPedidoAbierto(p);
+    limpiarPedidoInicial?.();
+  }, [pedidoInicialId, pedidos]);
 
   async function cargar() {
     const [{ data: p }, { data: m }, { data: s }] = await Promise.all([
@@ -203,8 +211,7 @@ export default function Pedidos({ perfil, userId }) {
       .eq("id", id)
       .single();
     if (!data || data.estado !== "entregado") return;
-    const totalPagos = (data.pedido_pagos || []).reduce((s, pg) => s + Number(pg.monto), 0);
-    const saldo = Math.round((Number(data.precio_venta || 0) - totalPagos) * 100) / 100;
+    const saldo = Math.round(calcularSaldoPendiente(data) * 100) / 100;
     if (saldo === 0) {
       await supabase.from("pedidos").update({ estado: "cobrado" }).eq("id", id);
     }
@@ -324,9 +331,8 @@ export default function Pedidos({ perfil, userId }) {
 
     const pagos = [...(p.pedido_pagos || [])].sort((a, b) =>
       new Date(b.fecha) - new Date(a.fecha) || new Date(b.creado_en) - new Date(a.creado_en));
-    const totalTodosPagos = pagos.reduce((s, pg) => s + Number(pg.monto), 0);
     const totalPagadoCliente = pagos.filter(pg => pg.metodo_pago !== "ajuste_ingreso").reduce((s, pg) => s + Number(pg.monto), 0);
-    const saldoPendiente = Number(p.precio_venta || 0) - totalTodosPagos;
+    const saldoPendiente = calcularSaldoPendiente(p);
     const saldoFavor = saldoPendiente < 0 ? Math.abs(saldoPendiente) : 0;
 
     return (
