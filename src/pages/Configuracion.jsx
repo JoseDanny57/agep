@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import ColorPickerModal from "../components/ColorPickerModal";
+import WhatsAppSupportModal from "../components/WhatsAppSupportModal";
 
 const TIPOS_VALIDOS_LOGO = ["image/jpeg", "image/png", "image/gif"];
 const MAX_SIZE_LOGO = 2 * 1024 * 1024; // 2 MB
@@ -26,6 +27,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [borrandoDatos, setBorrandoDatos] = useState(false);
   const [confirmBorrar, setConfirmBorrar] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const fileInputRef = useRef(null);
 
   async function cargarCategorias() {
@@ -294,6 +296,16 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
         )}
       </div>
 
+      {/* Ayuda y soporte */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <h2 className="font-bold text-slate-700 text-sm uppercase tracking-wide mb-1">Ayuda y soporte</h2>
+        <p className="text-xs text-slate-400 mb-4">¿Tenés una consulta, comentario o sugerencia? Escribinos por WhatsApp.</p>
+        <button onClick={() => setShowSupportModal(true)}
+          className="w-full border border-slate-200 text-slate-600 font-semibold rounded-xl py-3 text-sm hover:bg-slate-50 transition-colors">
+          💬 Contactar soporte
+        </button>
+      </div>
+
       {/* Borrar datos */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
         <h2 className="font-bold text-slate-700 text-sm uppercase tracking-wide mb-1">Zona de peligro</h2>
@@ -336,6 +348,10 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
             setShowColorPicker(false);
           }}
         />
+      )}
+
+      {showSupportModal && (
+        <WhatsAppSupportModal onClose={() => setShowSupportModal(false)} />
       )}
     </div>
   );
