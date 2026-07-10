@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import WhatsAppSupportModal from "./WhatsAppSupportModal";
 
 const navItems = [
   { id: "dashboard",     label: "Dashboard",     icon: "📊" },
@@ -19,6 +20,7 @@ const bottomNav = ["dashboard", "ingresos", "gastos", "pedidos", "inventario"];
 
 export default function Layout({ children, page, setPage, perfil }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const color = perfil?.color_principal || "#2E75B6";
 
   async function handleLogout() {
@@ -78,7 +80,11 @@ export default function Layout({ children, page, setPage, perfil }) {
                 </button>
               ))}
             </nav>
-            <div className="p-3 border-t border-slate-100">
+            <div className="p-3 border-t border-slate-100 space-y-1">
+              <button onClick={() => { setShowSupportModal(true); setMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-600 hover:bg-slate-100 font-medium">
+                <span>💬</span> Contactar soporte
+              </button>
               <button onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 font-medium">
                 <span>🚪</span> Cerrar sesión
@@ -86,6 +92,9 @@ export default function Layout({ children, page, setPage, perfil }) {
             </div>
           </div>
         </div>
+      )}
+      {showSupportModal && (
+        <WhatsAppSupportModal onClose={() => setShowSupportModal(false)} />
       )}
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-5">
         {children}
