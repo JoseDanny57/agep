@@ -9,6 +9,11 @@ export default function EditUserModal({ usuario, onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  function handleEstadoChange(value) {
+    setEstadoCuenta(value);
+    if (value === "exento") setFechaLimite("");
+  }
+
   async function handleGuardar() {
     setSaving(true);
     setError("");
@@ -16,7 +21,7 @@ export default function EditUserModal({ usuario, onClose, onSaved }) {
       .from("perfiles")
       .update({
         estado_cuenta: estadoCuenta,
-        fecha_limite_acceso: fechaLimite || null,
+        fecha_limite_acceso: estadoCuenta === "exento" ? null : (fechaLimite || null),
       })
       .eq("id", usuario.id);
     setSaving(false);
@@ -37,7 +42,7 @@ export default function EditUserModal({ usuario, onClose, onSaved }) {
           <label className="block text-xs font-semibold text-slate-600 mb-1.5">Estado de cuenta</label>
           <select
             value={estadoCuenta}
-            onChange={e => setEstadoCuenta(e.target.value)}
+            onChange={e => handleEstadoChange(e.target.value)}
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {ESTADOS.map(e => (
@@ -52,8 +57,12 @@ export default function EditUserModal({ usuario, onClose, onSaved }) {
             type="date"
             value={fechaLimite || ""}
             onChange={e => setFechaLimite(e.target.value)}
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={estadoCuenta === "exento"}
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
           />
+          {estadoCuenta === "exento" && (
+            <p className="text-xs text-slate-400 mt-1">No aplica una fecha límite para cuentas exentas.</p>
+          )}
         </div>
 
         {error && (
