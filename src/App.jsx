@@ -15,6 +15,8 @@ import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
 import Demo from "./pages/Demo";
+import AccesoVencido from "./components/AccesoVencido";
+import { accesoVencido } from "./utils/accesoCuenta";
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -78,6 +80,7 @@ export default function App() {
 
   if (!session) return <Login onDemoClick={() => setIsDemo(true)} />;
   if (!perfil) return <Onboarding onComplete={(p) => setPerfil(p)} userId={session.user.id} />;
+  if (accesoVencido(perfil)) return <AccesoVencido />;
 
   if (showSplash) {
     const color = perfil?.color_principal || "#2E75B6";

@@ -4,6 +4,7 @@ export const WHATSAPP_SUPPORT_OPTIONS = [
   { id: "consulta", label: "Consulta", icon: "❓", mensaje: "Hola, tengo una consulta sobre AGEP:" },
   { id: "comentario", label: "Comentario", icon: "💬", mensaje: "Hola, quiero dejar un comentario sobre AGEP:" },
   { id: "mejora", label: "Petición de mejora", icon: "💡", mensaje: "Hola, quiero sugerir una mejora para AGEP:" },
+  { id: "renovacion", label: "Renovación de acceso", icon: "💳", mensaje: "Hola, quiero renovar mi acceso a AGEP:" },
 ];
 
 export function abrirWhatsAppSoporte(mensaje) {
