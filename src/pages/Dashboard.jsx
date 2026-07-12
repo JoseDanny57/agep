@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { ResponsiveContainer, LineChart, Line } from "recharts";
 import { supabase } from "../lib/supabase";
 import { calcularSaldoPendiente } from "../utils/saldoPedido";
+import { ultimosNMeses, cargarDatosMensuales } from "../utils/estadisticas";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -26,9 +28,17 @@ function aclararHex(hex, percent) {
 export default function Dashboard({ perfil, userId, setPage }) {
   const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [], capitalInicial: 0, cuentasPorCobrar: 0 });
   const [loading, setLoading] = useState(true);
+  const [historico, setHistorico] = useState([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(true);
   const mes = getMes();
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => { cargar(); cargarHistorico(); }, []);
+
+  async function cargarHistorico() {
+    const data = await cargarDatosMensuales(userId, ultimosNMeses(6));
+    setHistorico(data);
+    setLoadingHistorico(false);
+  }
 
   async function cargar() {
     const [{ data: ing }, { data: gasOp }, { data: gasMat }, { data: gasAct }, { data: gasRet }, { data: mat }, { data: capital }, { data: pedidos }] = await Promise.all([
@@ -132,6 +142,30 @@ export default function Dashboard({ perfil, userId, setPage }) {
           className="text-xs font-semibold rounded-lg px-3 py-2 hover:opacity-90 flex-shrink-0"
           style={{ color, backgroundColor: color + "15" }}>
           Ver más →
+        </button>
+      </div>
+
+      {/* Card estadísticas — mini gráfica de utilidad de los últimos 6 meses */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-lg">📈</span>
+          <p className="text-xs font-semibold text-slate-500">UTILIDAD · ÚLTIMOS 6 MESES</p>
+        </div>
+        {loadingHistorico ? (
+          <div className="h-16 flex items-center justify-center text-xs text-slate-400">Cargando...</div>
+        ) : (
+          <div className="h-16">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={historico} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
+                <Line type="monotone" dataKey="utilidad" stroke={color} strokeWidth={2} dot={{ r: 2.5, fill: color, strokeWidth: 0 }} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+        <button onClick={() => setPage?.("estadisticas")}
+          className="w-full mt-3 text-xs font-semibold rounded-lg px-3 py-2 hover:opacity-90"
+          style={{ color, backgroundColor: color + "15" }}>
+          Ver estadísticas completas →
         </button>
       </div>
 

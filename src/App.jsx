@@ -11,6 +11,7 @@ import CuentasPorCobrar from "./pages/CuentasPorCobrar";
 import Servicios from "./pages/Servicios";
 import CapitalInicial from "./pages/CapitalInicial";
 import Costeo from "./pages/Costeo";
+import Estadisticas from "./pages/Estadisticas";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
@@ -117,6 +118,7 @@ export default function App() {
     servicios: Servicios,
     capital: CapitalInicial,
     costeo: Costeo,
+    estadisticas: Estadisticas,
     reportes: Reportes,
     configuracion: Configuracion
   };

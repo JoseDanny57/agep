@@ -12,6 +12,7 @@ const navItems = [
   { id: "inventario",    label: "Inventario",     icon: "📦" },
   { id: "capital",       label: "Capital Inicial", icon: "🏦" },
   { id: "costeo",        label: "Costeo",         icon: "🧮" },
+  { id: "estadisticas",  label: "Estadísticas",   icon: "📈" },
   { id: "reportes",      label: "Reportes PDF",   icon: "📄" },
   { id: "configuracion", label: "Configuración",  icon: "⚙️" },
 ];
