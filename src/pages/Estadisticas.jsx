@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { generarRangoMeses, cargarDatosMensuales } from "../utils/estadisticas";
 
 const NOMBRES_MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -32,14 +32,14 @@ function GraficaMensual({ titulo, icono, data, dataKey, color, moneda, permitirN
       </div>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 8, bottom: 0, left: 0 }}>
+          <BarChart data={data} margin={{ top: 5, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#f1f5f9" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={{ stroke: "#e2e8f0" }} tickLine={false} />
             <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={fmtCompacto} width={48} />
             {permitirNegativos && <ReferenceLine y={0} stroke="#e2e8f0" />}
-            <Tooltip content={<TooltipPersonalizado moneda={moneda} />} cursor={{ stroke: "#e2e8f0" }} />
-            <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={{ r: 3, fill: color, strokeWidth: 0 }} activeDot={{ r: 5 }} isAnimationActive={false} />
-          </LineChart>
+            <Tooltip content={<TooltipPersonalizado moneda={moneda} />} cursor={{ fill: "#f8fafc" }} />
+            <Bar dataKey={dataKey} fill={color} radius={[4, 4, 4, 4]} maxBarSize={22} isAnimationActive={false} />
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
