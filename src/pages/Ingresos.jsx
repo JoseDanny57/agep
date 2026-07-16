@@ -33,7 +33,8 @@ export default function Ingresos({ perfil, userId }) {
     cargar();
   }
 
-  async function eliminar(id) {
+  async function eliminar(id, origen) {
+    if (origen === "pedido") return;
     if (!confirm("¿Eliminar este ingreso?")) return;
     await supabase.from("ingresos").delete().eq("id", id);
     cargar();
@@ -132,7 +133,11 @@ export default function Ingresos({ perfil, userId }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-green-600 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
-                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                      {item.origen === "pedido" ? (
+                        <span className="text-slate-300 text-xs" title="Este ingreso viene de un pago registrado en Pedidos. Editalo o eliminalo desde ahí.">🔒</span>
+                      ) : (
+                        <button onClick={() => eliminar(item.id, item.origen)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                      )}
                     </div>
                   </div>
                 ))}
