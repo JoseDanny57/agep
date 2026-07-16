@@ -238,6 +238,8 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
     if (!pagoForm.monto || Number(pagoForm.monto) <= 0) return;
     setSavingPago(true);
     try {
+      const descripcionIngreso = `Pago pedido — ${pedidoAbierto.cliente} (${pagoForm.metodo_pago})`;
+
       if (pagoEditId) {
         const { error } = await supabase.from("pedido_pagos").update({
           monto: Number(pagoForm.monto),
@@ -246,15 +248,32 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           nota: pagoForm.nota || null,
         }).eq("id", pagoEditId);
         if (error) throw error;
+
+        const { error: errIngreso } = await supabase.from("ingresos").update({
+          monto: Number(pagoForm.monto),
+          descripcion: descripcionIngreso,
+          fecha: pagoForm.fecha,
+        }).eq("pedido_pago_id", pagoEditId);
+        if (errIngreso) throw errIngreso;
       } else {
-        const { error } = await supabase.from("pedido_pagos").insert({
+        const { data: nuevoPago, error } = await supabase.from("pedido_pagos").insert({
           pedido_id: pedidoAbierto.id,
           monto: Number(pagoForm.monto),
           metodo_pago: pagoForm.metodo_pago,
           fecha: pagoForm.fecha,
           nota: pagoForm.nota || null,
-        });
+        }).select().single();
         if (error) throw error;
+
+        const { error: errIngreso } = await supabase.from("ingresos").insert({
+          user_id: userId,
+          monto: Number(pagoForm.monto),
+          descripcion: descripcionIngreso,
+          fecha: pagoForm.fecha,
+          pedido_pago_id: nuevoPago.id,
+          origen: "pedido",
+        });
+        if (errIngreso) throw errIngreso;
       }
       cerrarPagoForm();
       await verificarAutoCobrado(pedidoAbierto.id);
@@ -289,20 +308,15 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       const hoy = hoyISO();
       const hoyFmt = new Date(hoy + "T12:00:00").toLocaleDateString("es-CR");
 
-      const { error: errIngreso } = await supabase.from("ingresos").insert({
-        user_id: userId,
-        monto,
-        descripcion: `Saldo a favor trasladado — Pedido: ${pedidoAbierto.cliente}, ${hoyFmt}`,
-        fecha: hoy,
-      });
-      if (errIngreso) throw errIngreso;
-
+      // El monto ya se contabilizó en Ingresos cuando se registró el pago
+      // original que generó el sobrepago — acá solo se cierra el saldo del
+      // pedido, sin volver a tocar Ingresos.
       const { error: errPago } = await supabase.from("pedido_pagos").insert({
         pedido_id: pedidoAbierto.id,
         monto: -monto,
         metodo_pago: "ajuste_ingreso",
         fecha: hoy,
-        nota: `Trasladado a Ingresos el ${hoyFmt}`,
+        nota: `Saldo a favor cerrado el ${hoyFmt}`,
       });
       if (errPago) throw errPago;
 
@@ -310,7 +324,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       await verificarAutoCobrado(pedidoAbierto.id);
       await refrescarPedido(pedidoAbierto.id);
     } catch (err) {
-      alert("Error al trasladar el saldo a Ingresos.");
+      alert("Error al cerrar el saldo a favor.");
       console.error(err);
     } finally {
       setSavingTraslado(false);
@@ -397,9 +411,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             <div className="absolute inset-0 bg-black/40" onClick={() => setShowTraslado(false)} />
             <div className="relative bg-white w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
               style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
-              <h3 className="font-bold text-slate-800">Trasladar saldo a Ingresos</h3>
+              <h3 className="font-bold text-slate-800">Cerrar saldo a favor</h3>
               <p className="text-sm text-slate-500">
                 Saldo a favor disponible: <span className="font-bold text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
+              </p>
+              <p className="text-xs text-slate-400">
+                Este dinero ya se registró en Ingresos cuando se recibió el pago. Esta acción solo cierra el saldo dentro de este pedido.
               </p>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto a trasladar ({moneda})</label>
@@ -416,7 +433,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                   disabled={savingTraslado || !trasladoMonto || Number(trasladoMonto) <= 0 || Number(trasladoMonto) > saldoFavor + 0.0001}
                   className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
                   style={{ backgroundColor: color }}>
-                  {savingTraslado ? "Trasladando..." : "Confirmar"}
+                  {savingTraslado ? "Cerrando..." : "Confirmar"}
                 </button>
               </div>
             </div>
@@ -497,7 +514,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           {saldoPendiente < 0 && (
             <button onClick={() => abrirTraslado(saldoFavor)}
               className="w-full border-2 border-amber-500 text-amber-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-amber-50">
-              Trasladar saldo a Ingresos
+              Cerrar saldo a favor del pedido
             </button>
           )}
         </div>
@@ -519,7 +536,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium">{new Date(pg.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
                       {esAjuste ? (
-                        <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] not-italic">Traspaso a Ingresos</span>
+                        <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] not-italic">Ajuste de saldo a favor</span>
                       ) : (
                         <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{METODOS_PAGO[pg.metodo_pago] || pg.metodo_pago}</span>
                       )}
