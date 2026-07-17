@@ -119,6 +119,19 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
     setItemsMaterial(items => [...items, { material_id: "", nombre_material: "", cantidad: "", costo_unitario: "" }]);
   }
 
+  function agregarMaterialesDesdeCatalogo(servicioId) {
+    const s = servicios.find(sv => sv.id === servicioId);
+    if (!s) return;
+    const nuevos = (s.servicio_materiales || []).map(m => ({
+      material_id: m.material_id || "",
+      nombre_material: m.nombre_material,
+      cantidad: String(m.cantidad),
+      costo_unitario: String(m.costo_unitario),
+    }));
+    setItemsMaterial(items => [...items, ...nuevos]);
+    setForm(f => ({ ...f, precio_venta: String((Number(f.precio_venta) || 0) + (Number(s.precio_venta) || 0)) }));
+  }
+
   function actualizarMaterial(idx, campo, valor) {
     setItemsMaterial(items => items.map((item, i) => {
       if (i !== idx) return item;
@@ -643,7 +656,18 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-slate-600">Materiales (opcional)</label>
-              <button onClick={agregarMaterial} className="text-xs font-medium hover:opacity-80" style={{ color }}>+ Agregar</button>
+              <div className="flex items-center gap-3">
+                {servicios.length > 0 && (
+                  <select className="text-xs font-medium bg-transparent border-none focus:outline-none cursor-pointer hover:opacity-80"
+                    style={{ color }}
+                    value=""
+                    onChange={e => agregarMaterialesDesdeCatalogo(e.target.value)}>
+                    <option value="">+ Agregar desde catálogo</option>
+                    {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                  </select>
+                )}
+                <button onClick={agregarMaterial} className="text-xs font-medium hover:opacity-80" style={{ color }}>+ Agregar</button>
+              </div>
             </div>
 
             {itemsMaterial.map((item, idx) => (
