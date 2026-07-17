@@ -142,7 +142,7 @@ export default function Gastos({ perfil, userId }) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Gastos</h1>
+          <h1 className="text-xl font-bold text-slate-800">Gastos/Compras</h1>
           <p className="text-sm text-slate-500 mt-0.5">Total: <span className="font-semibold text-red-500">{fmt(total, moneda)}</span></p>
         </div>
         <button onClick={() => setShowForm(true)}

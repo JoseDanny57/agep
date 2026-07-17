@@ -263,7 +263,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <button onClick={toggleCats}
           className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
-          <span className="font-bold text-slate-700 text-sm uppercase tracking-wide">Categorías de gastos</span>
+          <span className="font-bold text-slate-700 text-sm uppercase tracking-wide">Categorías de Gastos/Compras</span>
           <span className="text-slate-400 text-lg">{showCats ? "▲" : "▼"}</span>
         </button>
 
