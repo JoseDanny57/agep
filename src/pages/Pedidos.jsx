@@ -129,6 +129,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       costo_unitario: String(m.costo_unitario),
     }));
     setItemsMaterial(items => [...items, ...nuevos]);
+    setForm(f => ({ ...f, precio_venta: String((Number(f.precio_venta) || 0) + (Number(s.precio_venta) || 0)) }));
   }
 
   function actualizarMaterial(idx, campo, valor) {
