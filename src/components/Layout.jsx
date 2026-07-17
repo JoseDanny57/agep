@@ -5,7 +5,7 @@ import WhatsAppSupportModal from "./WhatsAppSupportModal";
 const navItems = [
   { id: "dashboard",     label: "Dashboard",     icon: "📊" },
   { id: "ingresos",      label: "Ingresos",      icon: "💰" },
-  { id: "gastos",        label: "Gastos",         icon: "💸" },
+  { id: "gastos",        label: "Gastos/Compras", icon: "💸" },
   { id: "pedidos",       label: "Pedidos",        icon: "📋" },
   { id: "cuentasPorCobrar", label: "Cuentas por Cobrar", icon: "💳" },
   { id: "servicios",     label: "Catálogo de Artículos", icon: "🧾" },
