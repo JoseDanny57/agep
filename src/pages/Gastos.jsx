@@ -9,7 +9,9 @@ function fmt(monto, moneda) {
 const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
 const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
 
-export default function Gastos({ perfil, userId, setPage }) {
+const NUEVA_CATEGORIA = "__nueva__";
+
+export default function Gastos({ perfil, userId }) {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,9 @@ export default function Gastos({ perfil, userId, setPage }) {
   const [facturaPreview, setFacturaPreview] = useState(null);
   const [facturaError, setFacturaError] = useState(null);
   const [viendoFactura, setViendoFactura] = useState(null);
+  const [showCategoriaModal, setShowCategoriaModal] = useState(false);
+  const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState("");
+  const [guardandoCategoria, setGuardandoCategoria] = useState(false);
   const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
@@ -104,6 +109,37 @@ export default function Gastos({ perfil, userId, setPage }) {
     cargar();
   }
 
+  function handleCategoriaChange(e) {
+    const val = e.target.value;
+    if (val === NUEVA_CATEGORIA) {
+      setShowCategoriaModal(true);
+      return;
+    }
+    setForm(f => ({ ...f, categoria_id: val }));
+  }
+
+  function cancelarNuevaCategoria() {
+    setNuevaCategoriaNombre("");
+    setShowCategoriaModal(false);
+  }
+
+  async function crearCategoria() {
+    if (!nuevaCategoriaNombre.trim()) return;
+    setGuardandoCategoria(true);
+    const { data, error } = await supabase.from("categorias_gastos")
+      .insert({ user_id: userId, nombre: nuevaCategoriaNombre.trim() })
+      .select().single();
+    setGuardandoCategoria(false);
+    if (error || !data) {
+      alert("Error al crear la categoría.");
+      return;
+    }
+    setCategorias(cs => [...cs, data].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+    setForm(f => ({ ...f, categoria_id: data.id }));
+    setNuevaCategoriaNombre("");
+    setShowCategoriaModal(false);
+  }
+
   async function eliminar(id) {
     if (!confirm("¿Eliminar este gasto?")) return;
     await supabase.from("gastos").delete().eq("id", id);
@@ -128,6 +164,34 @@ export default function Gastos({ perfil, userId, setPage }) {
 
   return (
     <div className="space-y-4">
+
+      {/* Modal nueva categoría */}
+      {showCategoriaModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={cancelarNuevaCategoria}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-slate-800">Nueva categoría</h3>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre</label>
+              <input autoFocus className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ej: Insumos"
+                value={nuevaCategoriaNombre}
+                onChange={e => setNuevaCategoriaNombre(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && crearCategoria()} />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={cancelarNuevaCategoria}
+                className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+                Cancelar
+              </button>
+              <button onClick={crearCategoria} disabled={guardandoCategoria || !nuevaCategoriaNombre.trim()}
+                className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
+                style={{ backgroundColor: color }}>
+                {guardandoCategoria ? "Guardando..." : "Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal ver factura */}
       {viendoFactura && (
@@ -207,21 +271,12 @@ export default function Gastos({ perfil, userId, setPage }) {
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Categoría *</label>
-            {categorias.length === 0 ? (
-              <div className="border border-dashed border-slate-200 rounded-xl px-4 py-3 bg-slate-50">
-                <p className="text-xs text-slate-500 mb-2">Necesitás crear al menos una categoría de gastos antes de registrar un gasto.</p>
-                <button onClick={() => setPage?.("configuracion")}
-                  className="text-xs font-semibold hover:underline" style={{ color }}>
-                  Ir a Configuración →
-                </button>
-              </div>
-            ) : (
-              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                value={form.categoria_id} onChange={e => setForm(f => ({ ...f, categoria_id: e.target.value }))}>
-                <option value="">Seleccioná una categoría</option>
-                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-              </select>
-            )}
+            <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              value={form.categoria_id} onChange={handleCategoriaChange}>
+              <option value="">Seleccioná una categoría</option>
+              {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              <option value={NUEVA_CATEGORIA}>+ Crear nueva categoría</option>
+            </select>
           </div>
 
           {/* Foto de factura */}
