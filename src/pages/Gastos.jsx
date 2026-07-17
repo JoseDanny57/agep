@@ -9,7 +9,7 @@ function fmt(monto, moneda) {
 const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
 const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
 
-export default function Gastos({ perfil, userId }) {
+export default function Gastos({ perfil, userId, setPage }) {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ export default function Gastos({ perfil, userId }) {
   }
 
   async function guardar() {
-    if (!form.descripcion || !form.monto) return;
+    if (!form.descripcion || !form.monto || !form.categoria_id) return;
     setSaving(true);
     await supabase.from("gastos").insert({
       user_id: userId,
@@ -96,7 +96,7 @@ export default function Gastos({ perfil, userId }) {
       monto: Number(form.monto),
       fecha: form.fecha,
       tipo: form.tipo,
-      ...(form.categoria_id ? { categoria_id: form.categoria_id } : {}),
+      categoria_id: form.categoria_id,
       ...(facturaUrl ? { factura_url: facturaUrl } : {}),
     });
     resetForm();
@@ -206,12 +206,22 @@ export default function Gastos({ perfil, userId }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Categoría (opcional)</label>
-            <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              value={form.categoria_id} onChange={e => setForm(f => ({ ...f, categoria_id: e.target.value }))}>
-              <option value="">Sin categoría</option>
-              {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-            </select>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Categoría *</label>
+            {categorias.length === 0 ? (
+              <div className="border border-dashed border-slate-200 rounded-xl px-4 py-3 bg-slate-50">
+                <p className="text-xs text-slate-500 mb-2">Necesitás crear al menos una categoría de gastos antes de registrar un gasto.</p>
+                <button onClick={() => setPage?.("configuracion")}
+                  className="text-xs font-semibold hover:underline" style={{ color }}>
+                  Ir a Configuración →
+                </button>
+              </div>
+            ) : (
+              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                value={form.categoria_id} onChange={e => setForm(f => ({ ...f, categoria_id: e.target.value }))}>
+                <option value="">Seleccioná una categoría</option>
+                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+              </select>
+            )}
           </div>
 
           {/* Foto de factura */}
@@ -243,7 +253,7 @@ export default function Gastos({ perfil, userId }) {
               className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto}
+            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id}
               className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
               style={{ backgroundColor: color }}>
               {saving ? "Guardando..." : "Guardar"}
