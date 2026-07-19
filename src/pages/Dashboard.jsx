@@ -205,23 +205,6 @@ export default function Dashboard({ perfil, userId, setPage }) {
         </div>
       )}
 
-      {/* Margen visual */}
-      {datos.ingresos > 0 && (
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-          <div className="flex justify-between text-xs text-slate-500 mb-2">
-            <span className="font-semibold">Margen de ganancia</span>
-            <span className="font-bold" style={{ color }}>{margen}%</span>
-          </div>
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${Math.max(0, Math.min(100, margen))}%`, backgroundColor: utilidad >= 0 ? color : "#ef4444" }} />
-          </div>
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-            <span>0%</span><span>50%</span><span>100%</span>
-          </div>
-        </div>
-      )}
-
       {/* Sin registros */}
       {datos.ingresos === 0 && datos.gastosOp === 0 && datos.gastosMat === 0 && datos.gastosAct === 0 && datos.retiro === 0 && (
         <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
