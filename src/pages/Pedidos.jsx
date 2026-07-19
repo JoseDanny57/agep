@@ -240,7 +240,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
     if (!data || data.estado === "cobrado") return;
     const saldo = Math.round(calcularSaldoPendiente(data) * 100) / 100;
     if (saldo === 0) {
-      await supabase.from("pedidos").update({ estado: "cobrado" }).eq("id", id);
+      await supabase.from("pedidos").update({ estado: "cobrado", estado_anterior: data.estado }).eq("id", id);
     }
   }
 
@@ -319,13 +319,14 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
     await supabase.from("pedido_pagos").delete().eq("id", id);
     if (estabaCobrado) {
       const { data } = await supabase.from("pedidos")
-        .select("precio_venta, estado, pedido_pagos(monto)")
+        .select("precio_venta, estado, estado_anterior, pedido_pagos(monto)")
         .eq("id", pedidoAbierto.id)
         .single();
       if (data) {
         const saldo = Math.round(calcularSaldoPendiente(data) * 100) / 100;
         if (saldo !== 0) {
-          await supabase.from("pedidos").update({ estado: "entregado" }).eq("id", pedidoAbierto.id);
+          const estadoRevertido = data.estado_anterior || "entregado";
+          await supabase.from("pedidos").update({ estado: estadoRevertido, estado_anterior: null }).eq("id", pedidoAbierto.id);
         }
       }
     }
