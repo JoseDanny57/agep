@@ -80,6 +80,16 @@ export default function Layout({ children, page, setPage, perfil }) {
                   {item.label}
                 </button>
               ))}
+              <a
+                href="https://knbqjcuhcwtcjqjxxnxm.supabase.co/storage/v1/object/public/documentos/Manual_Usuario_AGEP_v2.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100"
+              >
+                <span>📖</span>
+                Manual de uso
+              </a>
             </nav>
             <div className="p-3 border-t border-slate-100 space-y-1">
               <button onClick={() => { setShowSupportModal(true); setMenuOpen(false); }}
