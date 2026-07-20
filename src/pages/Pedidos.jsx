@@ -201,6 +201,20 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
   }
 
   async function eliminar(id) {
+    const { data: pagos, error: errPagos } = await supabase
+      .from("pedido_pagos")
+      .select("id")
+      .eq("pedido_id", id)
+      .limit(1);
+    if (errPagos) {
+      alert("Error al verificar los pagos del pedido.");
+      console.error(errPagos);
+      return;
+    }
+    if (pagos && pagos.length > 0) {
+      alert("No se puede eliminar este pedido porque tiene pagos registrados. Para eliminarlo, primero debes anular los pagos asociados.");
+      return;
+    }
     if (!confirm("¿Eliminar este pedido?")) return;
     await supabase.from("pedidos").delete().eq("id", id);
     setPedidoAbierto(null);
@@ -223,10 +237,10 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       .select("precio_venta, estado, pedido_pagos(monto)")
       .eq("id", id)
       .single();
-    if (!data || data.estado !== "entregado") return;
+    if (!data || data.estado === "cobrado") return;
     const saldo = Math.round(calcularSaldoPendiente(data) * 100) / 100;
     if (saldo === 0) {
-      await supabase.from("pedidos").update({ estado: "cobrado" }).eq("id", id);
+      await supabase.from("pedidos").update({ estado: "cobrado", estado_anterior: data.estado }).eq("id", id);
     }
   }
 
@@ -301,7 +315,21 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
   async function eliminarPago(id) {
     if (!confirm("¿Eliminar este pago?")) return;
+    const estabaCobrado = pedidoAbierto.estado === "cobrado";
     await supabase.from("pedido_pagos").delete().eq("id", id);
+    if (estabaCobrado) {
+      const { data } = await supabase.from("pedidos")
+        .select("precio_venta, estado, estado_anterior, pedido_pagos(monto)")
+        .eq("id", pedidoAbierto.id)
+        .single();
+      if (data) {
+        const saldo = Math.round(calcularSaldoPendiente(data) * 100) / 100;
+        if (saldo !== 0) {
+          const estadoRevertido = data.estado_anterior || "entregado";
+          await supabase.from("pedidos").update({ estado: estadoRevertido, estado_anterior: null }).eq("id", pedidoAbierto.id);
+        }
+      }
+    }
     await refrescarPedido(pedidoAbierto.id);
   }
 
