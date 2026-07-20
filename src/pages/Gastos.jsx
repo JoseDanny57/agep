@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { compressImageIfNeeded } from "../lib/imageCompress";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -63,24 +64,28 @@ export default function Gastos({ perfil, userId }) {
       return;
     }
 
-    if (file.size > MAX_SIZE_FACTURA) {
-      setFacturaError("El archivo supera el tamaño máximo de 5 MB.");
-      e.target.value = "";
-      return;
-    }
-
     setFacturaError(null);
     setUploadingFactura(true);
     try {
-      const extension = file.name.split(".").pop();
+      let archivo = file;
+      if (archivo.size > MAX_SIZE_FACTURA) {
+        archivo = await compressImageIfNeeded(archivo, { maxSizeBytes: MAX_SIZE_FACTURA, maxWidth: 1600 });
+      }
+      if (archivo.size > MAX_SIZE_FACTURA) {
+        setFacturaError("El archivo supera el tamaño máximo de 5 MB.");
+        e.target.value = "";
+        return;
+      }
+
+      const extension = archivo.name.split(".").pop();
       const filePath = `${userId}/${Date.now()}.${extension}`;
       const { error: uploadError } = await supabase.storage
         .from("facturas")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, archivo, { upsert: true });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("facturas").getPublicUrl(filePath);
       setFacturaUrl(urlData.publicUrl);
-      setFacturaPreview(URL.createObjectURL(file));
+      setFacturaPreview(URL.createObjectURL(archivo));
     } catch (err) {
       alert("Error al subir la factura.");
       console.error(err);
