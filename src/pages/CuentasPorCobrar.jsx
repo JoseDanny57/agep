@@ -33,7 +33,8 @@ export default function CuentasPorCobrar({ perfil, userId, onSeleccionarPedido }
     .filter(p => p.saldo !== 0)
     .sort((a, b) => b.saldo - a.saldo);
 
-  const totalPendiente = filas.reduce((s, p) => s + Math.max(p.saldo, 0), 0);
+  const totalPendiente = filas.reduce((s, p) => s + p.saldo, 0);
+  const totalSaldoFavor = filas.reduce((s, p) => s + (p.saldo < 0 ? -p.saldo : 0), 0);
 
   if (loading) return <div className="text-center py-12 text-slate-400">Cargando...</div>;
 
@@ -41,7 +42,10 @@ export default function CuentasPorCobrar({ perfil, userId, onSeleccionarPedido }
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-slate-800">Cuentas por Cobrar</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Total pendiente: <span className="font-semibold" style={{ color }}>{fmt(totalPendiente, moneda)}</span></p>
+        <p className="text-sm text-slate-500 mt-0.5">Total pendiente: <span className="font-semibold" style={{ color }}>{fmtSaldo(totalPendiente, moneda)}</span></p>
+        {totalSaldoFavor > 0 && (
+          <p className="text-sm text-slate-500 mt-0.5">Saldo a favor total: <span className="font-semibold text-amber-600">{fmt(totalSaldoFavor, moneda)}</span></p>
+        )}
       </div>
 
       {filas.length === 0 ? (
