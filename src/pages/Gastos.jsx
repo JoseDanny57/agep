@@ -32,6 +32,8 @@ export default function Gastos({ perfil, userId }) {
   const [uploadingFactura, setUploadingFactura] = useState(false);
   const [facturaUrl, setFacturaUrl] = useState(null);
   const [facturaPreview, setFacturaPreview] = useState(null);
+  const [facturaNombre, setFacturaNombre] = useState(null);
+  const [facturaEsPdf, setFacturaEsPdf] = useState(false);
   const [facturaError, setFacturaError] = useState(null);
   const [viendoFactura, setViendoFactura] = useState(null);
   const [showCategoriaModal, setShowCategoriaModal] = useState(false);
@@ -84,8 +86,11 @@ export default function Gastos({ perfil, userId }) {
         .upload(filePath, archivo, { upsert: true });
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from("facturas").getPublicUrl(filePath);
+      const esPdf = archivo.type === "application/pdf";
       setFacturaUrl(urlData.publicUrl);
-      setFacturaPreview(URL.createObjectURL(archivo));
+      setFacturaPreview(esPdf ? null : URL.createObjectURL(archivo));
+      setFacturaNombre(archivo.name);
+      setFacturaEsPdf(esPdf);
     } catch (err) {
       alert("Error al subir la factura.");
       console.error(err);
@@ -108,8 +113,19 @@ export default function Gastos({ perfil, userId }) {
     });
     setFacturaUrl(null);
     setFacturaPreview(null);
+    setFacturaNombre(null);
+    setFacturaEsPdf(false);
     setFacturaError(null);
     setShowForm(false);
+  }
+
+  function quitarFactura() {
+    setFacturaUrl(null);
+    setFacturaPreview(null);
+    setFacturaNombre(null);
+    setFacturaEsPdf(false);
+    setFacturaError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function seleccionarTipo(key) {
@@ -391,12 +407,23 @@ export default function Gastos({ perfil, userId }) {
             {facturaError && (
               <p className="text-xs text-red-500 mb-2">⚠️ {facturaError}</p>
             )}
-            {facturaPreview ? (
+            {facturaUrl && facturaEsPdf ? (
+              <div className="relative">
+                <a href={facturaUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 hover:bg-slate-100">
+                  <span className="text-2xl">📄</span>
+                  <span className="text-sm text-slate-600 truncate">{facturaNombre}</span>
+                </a>
+                <p className="text-[10px] text-slate-400 text-center mt-1">Tocá para abrir el PDF</p>
+                <button onClick={quitarFactura}
+                  className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
+              </div>
+            ) : facturaPreview ? (
               <div className="relative">
                 <img src={facturaPreview} alt="Factura" className="w-full h-24 object-contain rounded-xl border border-slate-200 bg-slate-50 cursor-pointer"
                   onClick={() => setViendoFactura(facturaPreview)} />
                 <p className="text-[10px] text-slate-400 text-center mt-1">Tocá la imagen para verla completa</p>
-                <button onClick={() => { setFacturaUrl(null); setFacturaPreview(null); setFacturaError(null); }}
+                <button onClick={quitarFactura}
                   className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
               </div>
             ) : (
