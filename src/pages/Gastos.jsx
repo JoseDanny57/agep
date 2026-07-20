@@ -112,10 +112,13 @@ export default function Gastos({ perfil, userId }) {
     if (key === "material") setShowCompraModal(true);
   }
 
+  const esCompra = form.tipo === "material" || form.tipo === "activo";
+  const faltanDatosCompra = esCompra && (!form.proveedor.trim() || !form.numero_comprobante.trim());
+
   async function guardar() {
-    if (!form.descripcion || !form.monto || !form.categoria_id) return;
+    if (!form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra) return;
     setSaving(true);
-    const camposCompra = (form.tipo === "material" || form.tipo === "activo")
+    const camposCompra = esCompra
       ? {
         proveedor: form.proveedor || null,
         numero_comprobante: form.numero_comprobante || null,
@@ -271,7 +274,10 @@ export default function Gastos({ perfil, userId }) {
 
       {showForm && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-          <h3 className="font-bold text-slate-800">Nuevo gasto</h3>
+          <div>
+            <h3 className="font-bold text-slate-800">Nuevo gasto</h3>
+            <p className="text-[10px] text-slate-400 mt-0.5">* Campo obligatorio</p>
+          </div>
 
           {/* Tipo de egreso */}
           <div>
@@ -314,6 +320,7 @@ export default function Gastos({ perfil, userId }) {
               <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0" value={form.monto}
                 onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} />
+              <p className="text-[10px] text-slate-400 mt-1">El monto debe incluir el IVA</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
@@ -336,13 +343,13 @@ export default function Gastos({ perfil, userId }) {
             <div className="space-y-3 border-t border-slate-100 pt-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Proveedor (opcional)</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Proveedor *</label>
                   <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Ej: Textiles ABC"
                     value={form.proveedor} onChange={e => setForm(f => ({ ...f, proveedor: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">N.° de comprobante (opcional)</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">N.° de comprobante *</label>
                   <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Ej: F-00123"
                     value={form.numero_comprobante} onChange={e => setForm(f => ({ ...f, numero_comprobante: e.target.value }))} />
@@ -352,8 +359,13 @@ export default function Gastos({ perfil, userId }) {
               {form.tipo === "material" && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tarifa de IVA (%)</label>
-                  <input type="number" step="0.01" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={form.tarifa_iva} onChange={e => setForm(f => ({ ...f, tarifa_iva: e.target.value }))} />
+                  <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    value={form.tarifa_iva} onChange={e => setForm(f => ({ ...f, tarifa_iva: e.target.value }))}>
+                    <option value="0">0% (Exento)</option>
+                    <option value="1">1%</option>
+                    <option value="2">2%</option>
+                    <option value="13">13%</option>
+                  </select>
                 </div>
               )}
 
@@ -395,7 +407,7 @@ export default function Gastos({ perfil, userId }) {
               className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
               Cancelar
             </button>
-            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id}
+            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra}
               className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
               style={{ backgroundColor: color }}>
               {saving ? "Guardando..." : "Guardar"}
