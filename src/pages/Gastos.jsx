@@ -22,6 +22,10 @@ export default function Gastos({ perfil, userId }) {
     categoria_id: "",
     fecha: new Date().toISOString().split("T")[0],
     tipo: "operativo",
+    proveedor: "",
+    numero_comprobante: "",
+    tarifa_iva: "13",
+    observaciones: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingFactura, setUploadingFactura] = useState(false);
@@ -30,6 +34,7 @@ export default function Gastos({ perfil, userId }) {
   const [facturaError, setFacturaError] = useState(null);
   const [viendoFactura, setViendoFactura] = useState(null);
   const [showCategoriaModal, setShowCategoriaModal] = useState(false);
+  const [showCompraModal, setShowCompraModal] = useState(false);
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState("");
   const [guardandoCategoria, setGuardandoCategoria] = useState(false);
   const fileInputRef = useRef(null);
@@ -85,16 +90,39 @@ export default function Gastos({ perfil, userId }) {
   }
 
   function resetForm() {
-    setForm({ descripcion: "", monto: "", categoria_id: "", fecha: new Date().toISOString().split("T")[0], tipo: "operativo" });
+    setForm({
+      descripcion: "",
+      monto: "",
+      categoria_id: "",
+      fecha: new Date().toISOString().split("T")[0],
+      tipo: "operativo",
+      proveedor: "",
+      numero_comprobante: "",
+      tarifa_iva: "13",
+      observaciones: "",
+    });
     setFacturaUrl(null);
     setFacturaPreview(null);
     setFacturaError(null);
     setShowForm(false);
   }
 
+  function seleccionarTipo(key) {
+    setForm(f => ({ ...f, tipo: key }));
+    if (key === "material") setShowCompraModal(true);
+  }
+
   async function guardar() {
     if (!form.descripcion || !form.monto || !form.categoria_id) return;
     setSaving(true);
+    const camposCompra = (form.tipo === "material" || form.tipo === "activo")
+      ? {
+        proveedor: form.proveedor || null,
+        numero_comprobante: form.numero_comprobante || null,
+        tarifa_iva: form.tipo === "material" ? Number(form.tarifa_iva || 13) : null,
+        observaciones: form.observaciones || null,
+      }
+      : {};
     await supabase.from("gastos").insert({
       user_id: userId,
       descripcion: form.descripcion,
@@ -102,6 +130,7 @@ export default function Gastos({ perfil, userId }) {
       fecha: form.fecha,
       tipo: form.tipo,
       categoria_id: form.categoria_id,
+      ...camposCompra,
       ...(facturaUrl ? { factura_url: facturaUrl } : {}),
     });
     resetForm();
@@ -193,6 +222,30 @@ export default function Gastos({ perfil, userId }) {
         </div>
       )}
 
+      {/* Modal explicativo: Compra de material */}
+      {showCompraModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowCompraModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-slate-800">¿Qué cuenta como Compra?</h3>
+            <div className="text-sm text-slate-600 space-y-2">
+              <p>Para el Régimen Simplificado, registrá aquí:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Mercadería para la venta</li>
+                <li>Materias primas</li>
+                <li>Materiales, insumos o suministros usados para fabricar o prestar el servicio</li>
+                <li>Servicios contratados para la actividad del negocio (impresión, transporte, publicidad)</li>
+              </ul>
+              <p>Recordá incluir el IVA pagado en la compra.</p>
+            </div>
+            <button onClick={() => setShowCompraModal(false)}
+              className="w-full text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90"
+              style={{ backgroundColor: color }}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal ver factura */}
       {viendoFactura && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setViendoFactura(null)}>
@@ -226,7 +279,7 @@ export default function Gastos({ perfil, userId }) {
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(tipoConfig).map(([key, cfg]) => (
                 <button key={key}
-                  onClick={() => setForm(f => ({ ...f, tipo: key }))}
+                  onClick={() => seleccionarTipo(key)}
                   className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 text-slate-500"}`}>
                   {cfg.emoji} {cfg.label}
                 </button>
@@ -278,6 +331,40 @@ export default function Gastos({ perfil, userId }) {
               <option value={NUEVA_CATEGORIA}>+ Crear nueva categoría</option>
             </select>
           </div>
+
+          {(form.tipo === "material" || form.tipo === "activo") && (
+            <div className="space-y-3 border-t border-slate-100 pt-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Proveedor (opcional)</label>
+                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: Textiles ABC"
+                    value={form.proveedor} onChange={e => setForm(f => ({ ...f, proveedor: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">N.° de comprobante (opcional)</label>
+                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: F-00123"
+                    value={form.numero_comprobante} onChange={e => setForm(f => ({ ...f, numero_comprobante: e.target.value }))} />
+                </div>
+              </div>
+
+              {form.tipo === "material" && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tarifa de IVA (%)</label>
+                  <input type="number" step="0.01" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={form.tarifa_iva} onChange={e => setForm(f => ({ ...f, tarifa_iva: e.target.value }))} />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Observaciones (opcional)</label>
+                <textarea rows={2} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Notas adicionales"
+                  value={form.observaciones} onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))} />
+              </div>
+            </div>
+          )}
 
           {/* Foto de factura */}
           <div>
