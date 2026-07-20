@@ -9,6 +9,10 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
+function fmtSaldo(saldo, moneda) {
+  return saldo < 0 ? `(${fmt(Math.abs(saldo), moneda)})` : fmt(saldo, moneda);
+}
+
 function getMes() {
   const now = new Date();
   return { inicio: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`,
@@ -26,7 +30,7 @@ function aclararHex(hex, percent) {
 }
 
 export default function Dashboard({ perfil, userId, setPage }) {
-  const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [], capitalInicial: 0, cuentasPorCobrar: 0 });
+  const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [], capitalInicial: 0, cuentasPorCobrar: 0, saldoFavorTotal: 0 });
   const [loading, setLoading] = useState(true);
   const [historico, setHistorico] = useState([]);
   const [loadingHistorico, setLoadingHistorico] = useState(true);
@@ -59,10 +63,11 @@ export default function Dashboard({ perfil, userId, setPage }) {
     const totalRetiro = (gasRet || []).reduce((s, r) => s + Number(r.monto), 0);
     const stockBajo   = (mat    || []).filter(m => Number(m.stock_actual) <= Number(m.stock_minimo));
     const totalCapital = (capital || []).reduce((s, r) => s + Number(r.monto), 0);
-    const totalCuentasPorCobrar = (pedidos || [])
-      .reduce((s, p) => s + Math.max(calcularSaldoPendiente(p), 0), 0);
+    const saldosPedidos = (pedidos || []).map(p => calcularSaldoPendiente(p));
+    const totalCuentasPorCobrar = saldosPedidos.reduce((s, saldo) => s + saldo, 0);
+    const totalSaldoFavor = saldosPedidos.reduce((s, saldo) => s + (saldo < 0 ? -saldo : 0), 0);
 
-    setDatos({ ingresos: totalIng, gastosOp: totalGasOp, gastosMat: totalGasMat, gastosAct: totalGasAct, retiro: totalRetiro, stockBajo, capitalInicial: totalCapital, cuentasPorCobrar: totalCuentasPorCobrar });
+    setDatos({ ingresos: totalIng, gastosOp: totalGasOp, gastosMat: totalGasMat, gastosAct: totalGasAct, retiro: totalRetiro, stockBajo, capitalInicial: totalCapital, cuentasPorCobrar: totalCuentasPorCobrar, saldoFavorTotal: totalSaldoFavor });
     setLoading(false);
   }
 
@@ -132,8 +137,13 @@ export default function Dashboard({ perfil, userId, setPage }) {
             <span className="text-lg">🧾</span>
             <p className="text-xs font-semibold text-slate-500">CUENTAS POR COBRAR</p>
           </div>
-          {datos.cuentasPorCobrar > 0 ? (
-            <p className="text-lg font-bold text-slate-800 truncate">{fmt(datos.cuentasPorCobrar, moneda)}</p>
+          {datos.cuentasPorCobrar !== 0 || datos.saldoFavorTotal > 0 ? (
+            <>
+              <p className="text-lg font-bold text-slate-800 truncate">{fmtSaldo(datos.cuentasPorCobrar, moneda)}</p>
+              {datos.saldoFavorTotal > 0 && (
+                <p className="text-xs font-semibold text-amber-600 truncate">Saldo a favor: {fmt(datos.saldoFavorTotal, moneda)}</p>
+              )}
+            </>
           ) : (
             <p className="text-sm text-slate-400">Sin saldos pendientes</p>
           )}
