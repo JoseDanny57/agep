@@ -12,10 +12,10 @@ function fmtSaldoFavor(montoAbsoluto, moneda) {
 }
 
 const ESTADOS = {
-  pendiente:   { label: "Pendiente",   color: "bg-amber-100 text-amber-700",   emoji: "🕐" },
-  en_proceso:  { label: "En proceso",  color: "bg-blue-100 text-blue-700",     emoji: "⚙️" },
-  entregado:   { label: "Entregado",   color: "bg-purple-100 text-purple-700", emoji: "📦" },
-  cobrado:     { label: "Cobrado",     color: "bg-green-100 text-green-700",   emoji: "✅" },
+  pendiente:   { label: "Pendiente",   color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",   emoji: "🕐" },
+  en_proceso:  { label: "En proceso",  color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",     emoji: "⚙️" },
+  entregado:   { label: "Entregado",   color: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300", emoji: "📦" },
+  cobrado:     { label: "Cobrado",     color: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",   emoji: "✅" },
 };
 
 const METODOS_PAGO = {
@@ -401,14 +401,14 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
               <h3 className="font-bold text-slate-800 dark:text-slate-100">{pagoEditId ? "Editar pago" : "Registrar pago"}</h3>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monto ({moneda}) *</label>
                 <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="0" value={pagoForm.monto}
                   onChange={e => setPagoForm(f => ({ ...f, monto: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Método de pago</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Método de pago</label>
                 <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 bg-white"
                   value={pagoForm.metodo_pago}
                   onChange={e => setPagoForm(f => ({ ...f, metodo_pago: e.target.value }))}>
@@ -419,13 +419,13 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha</label>
                 <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   value={pagoForm.fecha} onChange={e => setPagoForm(f => ({ ...f, fecha: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nota (opcional)</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nota (opcional)</label>
                 <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="Ej: Abono inicial"
                   value={pagoForm.nota} onChange={e => setPagoForm(f => ({ ...f, nota: e.target.value }))} />
@@ -433,7 +433,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
               <div className="flex gap-3">
                 <button onClick={cerrarPagoForm}
-                  className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+                  className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
                   Cancelar
                 </button>
                 <button onClick={guardarPago} disabled={savingPago || !pagoForm.monto || Number(pagoForm.monto) <= 0}
@@ -460,14 +460,14 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                 Este dinero ya se registró en Ingresos cuando se recibió el pago. Esta acción solo cierra el saldo dentro de este pedido.
               </p>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto a trasladar ({moneda})</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monto a trasladar ({moneda})</label>
                 <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   value={trasladoMonto} max={saldoFavor} min={0}
                   onChange={e => setTrasladoMonto(e.target.value)} />
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setShowTraslado(false)}
-                  className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+                  className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
                   Cancelar
                 </button>
                 <button onClick={() => confirmarTraslado(saldoFavor)}
@@ -482,7 +482,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         )}
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setPedidoAbierto(null)} className="text-slate-400 hover:text-slate-600 text-xl">←</button>
+          <button onClick={() => setPedidoAbierto(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-xl">←</button>
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex-1">{p.cliente}</h1>
           <button onClick={() => eliminar(p.id)} className="text-slate-300 hover:text-red-400 text-sm">🗑️</button>
         </div>
@@ -493,7 +493,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(ESTADOS).map(([key, cfg]) => (
               <button key={key} onClick={() => cambiarEstado(p.id, key)}
-                className={`py-2 rounded-xl text-xs font-medium border-2 transition-all ${p.estado === key ? "border-current " + cfg.color : "border-slate-200 text-slate-400"}`}>
+                className={`py-2 rounded-xl text-xs font-medium border-2 transition-all ${p.estado === key ? "border-current " + cfg.color : "border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500"}`}>
                 {cfg.emoji} {cfg.label}
               </button>
             ))}
@@ -502,7 +502,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
         {/* Info */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-2">
-          {p.descripcion && <p className="text-sm text-slate-600">{p.descripcion}</p>}
+          {p.descripcion && <p className="text-sm text-slate-600 dark:text-slate-300">{p.descripcion}</p>}
           {p.fecha_entrega && (
             <p className="text-xs text-slate-400">📅 Entrega: {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>
           )}
@@ -520,7 +520,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             <span className="font-bold text-red-500">{fmt(costoP, moneda)}</span>
           </div>
           <div className="border-t border-slate-100 pt-2 flex justify-between text-sm">
-            <span className="font-semibold text-slate-700">Ganancia estimada</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Ganancia estimada</span>
             <span className={`font-bold text-lg ${ganancia >= 0 ? "text-green-600" : "text-red-500"}`}>{fmt(ganancia, moneda)}</span>
           </div>
         </div>
@@ -535,19 +535,19 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <div className="border-t border-slate-100 pt-2 flex justify-between text-sm items-center">
             {saldoPendiente > 0 && (
               <>
-                <span className="font-semibold text-slate-700">Saldo pendiente</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Saldo pendiente</span>
                 <span className="font-bold text-lg text-red-500">{fmt(saldoPendiente, moneda)}</span>
               </>
             )}
             {saldoPendiente < 0 && (
               <>
-                <span className="font-semibold text-slate-700">Saldo a favor del cliente</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Saldo a favor del cliente</span>
                 <span className="font-bold text-lg text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </>
             )}
             {saldoPendiente === 0 && (
               <>
-                <span className="font-semibold text-slate-700">Estado de pago</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Estado de pago</span>
                 <span className="font-bold text-lg text-green-600">Pagado completo</span>
               </>
             )}
@@ -572,14 +572,14 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             pagos.map((pg, idx) => {
               const esAjuste = pg.metodo_pago === "ajuste_ingreso";
               return (
-                <div key={pg.id} className={`flex items-center justify-between px-4 py-3 ${idx < pagos.length - 1 ? "border-b border-slate-50" : ""}`}>
+                <div key={pg.id} className={`flex items-center justify-between px-4 py-3 ${idx < pagos.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                   <div className={esAjuste ? "italic text-slate-400" : ""}>
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium">{new Date(pg.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
                       {esAjuste ? (
-                        <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] not-italic">Ajuste de saldo a favor</span>
+                        <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 text-[10px] not-italic">Ajuste de saldo a favor</span>
                       ) : (
-                        <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{METODOS_PAGO[pg.metodo_pago] || pg.metodo_pago}</span>
+                        <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 text-[10px]">{METODOS_PAGO[pg.metodo_pago] || pg.metodo_pago}</span>
                       )}
                     </div>
                     {pg.nota && <p className="text-xs text-slate-400 mt-0.5">{pg.nota}</p>}
@@ -606,12 +606,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
             <p className="text-xs font-semibold text-slate-500 px-4 pt-4 pb-2">MATERIALES</p>
             {p.pedido_materiales.map((m, idx) => (
-              <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < p.pedido_materiales.length - 1 ? "border-b border-slate-50" : ""}`}>
+              <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < p.pedido_materiales.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                 <div>
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{m.nombre_material}</p>
                   <p className="text-xs text-slate-400">{m.cantidad} × {fmt(m.costo_unitario, moneda)}</p>
                 </div>
-                <p className="text-sm font-bold text-slate-700">{fmt(m.cantidad * m.costo_unitario, moneda)}</p>
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{fmt(m.cantidad * m.costo_unitario, moneda)}</p>
               </div>
             ))}
           </div>
@@ -640,7 +640,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <h3 className="font-bold text-slate-800 dark:text-slate-100">Nuevo pedido</h3>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Cliente *</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Cliente *</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Nombre del cliente"
               value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} />
@@ -648,7 +648,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
           {servicios.length > 0 && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Artículo del catálogo (opcional)</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Artículo del catálogo (opcional)</label>
               <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 bg-white"
                 value={form.servicio_id}
                 onChange={e => elegirServicio(e.target.value)}>
@@ -660,7 +660,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción (opcional)</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Descripción (opcional)</label>
             <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Ej: Arreglo de globos azul y blanco"
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
@@ -668,13 +668,13 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Precio de venta ({moneda})</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Precio de venta ({moneda})</label>
               <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="0"
                 value={form.precio_venta} onChange={e => setForm(f => ({ ...f, precio_venta: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha de entrega</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha de entrega</label>
               <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 value={form.fecha_entrega} onChange={e => setForm(f => ({ ...f, fecha_entrega: e.target.value }))} />
             </div>
@@ -683,7 +683,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           {/* Materiales */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-slate-600">Materiales (opcional)</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Materiales (opcional)</label>
               <div className="flex items-center gap-3">
                 {servicios.length > 0 && (
                   <select className="text-xs font-medium bg-transparent border-none focus:outline-none cursor-pointer hover:opacity-80"
@@ -732,11 +732,11 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
           {/* Resumen financiero en tiempo real */}
           {(form.precio_venta || itemsMaterial.length > 0) && (
-            <div className="bg-slate-50 rounded-xl p-3 space-y-1">
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 space-y-1">
               {costo > 0 && <div className="flex justify-between text-xs text-slate-500"><span>Costo materiales</span><span className="font-medium">{fmt(costo, moneda)}</span></div>}
               {form.precio_venta && <div className="flex justify-between text-xs text-slate-500"><span>Precio de venta</span><span className="font-medium">{fmt(Number(form.precio_venta), moneda)}</span></div>}
               {form.precio_venta && costo > 0 && (
-                <div className="flex justify-between text-sm font-bold border-t border-slate-200 pt-1 mt-1">
+                <div className="flex justify-between text-sm font-bold border-t border-slate-200 dark:border-slate-700 pt-1 mt-1">
                   <span>Ganancia estimada</span>
                   <span className={gananciaEstimada >= 0 ? "text-green-600" : "text-red-500"}>{fmt(gananciaEstimada, moneda)}</span>
                 </div>
@@ -746,7 +746,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
           <div className="flex gap-3">
             <button onClick={resetForm}
-              className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+              className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
               Cancelar
             </button>
             <button onClick={guardar} disabled={saving || !form.cliente}
@@ -762,7 +762,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       {pedidos.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">📋</p>
-          <p className="font-semibold text-slate-600">Sin pedidos registrados</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">Sin pedidos registrados</p>
           <p className="text-sm text-slate-400 mt-1">Creá tu primer pedido.</p>
         </div>
       ) : (
@@ -773,7 +773,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             const est = ESTADOS[p.estado] || ESTADOS.pendiente;
             return (
               <div key={p.id}
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 ${idx < pedidos.length - 1 ? "border-b border-slate-50" : ""}`}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 ${idx < pedidos.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}
                 onClick={() => setPedidoAbierto(p)}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">

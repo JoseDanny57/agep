@@ -125,9 +125,9 @@ export default function ColorPickerModal({ initialColor, onClose, onSelect }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
+      <div className="relative bg-white dark:bg-slate-800 w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
         style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
-        <h2 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Seleccionar color</h2>
+        <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm uppercase tracking-wide">Seleccionar color</h2>
 
         {/* Cuadro de saturación/brillo */}
         <div
@@ -162,11 +162,11 @@ export default function ColorPickerModal({ initialColor, onClose, onSelect }) {
 
         {/* Vista previa + HEX */}
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl border border-slate-200 flex-shrink-0" style={{ backgroundColor: hex }} />
+          <div className="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-600 flex-shrink-0" style={{ backgroundColor: hex }} />
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-slate-500 mb-1">Código HEX</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Código HEX</label>
             <input
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={hexInput}
               onChange={e => handleHexChange(e.target.value)}
               maxLength={7}
@@ -178,12 +178,12 @@ export default function ColorPickerModal({ initialColor, onClose, onSelect }) {
         <div className="grid grid-cols-3 gap-2">
           {["r", "g", "b"].map(channel => (
             <div key={channel}>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 {channel === "r" ? "Rojo" : channel === "g" ? "Verde" : "Azul"}
               </label>
               <input
                 type="number" min={0} max={255}
-                className="w-full border border-slate-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={rgb[channel]}
                 onChange={e => handleRgbChange(channel, e.target.value)}
               />
@@ -193,12 +193,12 @@ export default function ColorPickerModal({ initialColor, onClose, onSelect }) {
 
         {/* Presets rápidos */}
         <div>
-          <label className="block text-xs font-semibold text-slate-500 mb-2">Colores rápidos</label>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Colores rápidos</label>
           <div className="flex flex-wrap gap-2">
             {PRESETS.map(c => (
               <button key={c}
                 onClick={() => { const p = hexToRgb(c); setHsv(rgbToHsv(p.r, p.g, p.b)); }}
-                className="w-8 h-8 rounded-full border-2 border-slate-200"
+                className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-600"
                 style={{ backgroundColor: c }} />
             ))}
           </div>
@@ -207,7 +207,7 @@ export default function ColorPickerModal({ initialColor, onClose, onSelect }) {
         {/* Acciones */}
         <div className="grid grid-cols-2 gap-3 pt-1">
           <button onClick={onClose}
-            className="border border-slate-200 text-slate-600 font-semibold rounded-xl py-3 text-sm hover:bg-slate-50">
+            className="border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
             Cancelar
           </button>
           <button onClick={() => onSelect(hex)}
