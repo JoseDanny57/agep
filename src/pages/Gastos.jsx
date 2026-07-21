@@ -11,6 +11,7 @@ const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/we
 const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
 
 const NUEVA_CATEGORIA = "__nueva__";
+const GASTOS_DRAFT_KEY = "agep_gastos_borrador";
 
 export default function Gastos({ perfil, userId }) {
   const [gastos, setGastos] = useState([]);
@@ -40,11 +41,33 @@ export default function Gastos({ perfil, userId }) {
   const [showCompraModal, setShowCompraModal] = useState(false);
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState("");
   const [guardandoCategoria, setGuardandoCategoria] = useState(false);
+  const [avisoBorrador, setAvisoBorrador] = useState(false);
   const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    cargar();
+    try {
+      const raw = sessionStorage.getItem(GASTOS_DRAFT_KEY);
+      if (raw) {
+        const borrador = JSON.parse(raw);
+        setForm(f => ({ ...f, ...borrador }));
+        setShowForm(true);
+        setAvisoBorrador(true);
+      }
+    } catch {
+      sessionStorage.removeItem(GASTOS_DRAFT_KEY);
+    }
+  }, []);
+
+  function guardarBorrador() {
+    try {
+      sessionStorage.setItem(GASTOS_DRAFT_KEY, JSON.stringify(form));
+    } catch {
+      // sessionStorage no disponible (modo privado, cuota llena, etc.) — se ignora, no es crítico.
+    }
+  }
 
   async function cargar() {
     const [{ data: g }, { data: c }] = await Promise.all([
@@ -117,6 +140,8 @@ export default function Gastos({ perfil, userId }) {
     setFacturaEsPdf(false);
     setFacturaError(null);
     setShowForm(false);
+    setAvisoBorrador(false);
+    sessionStorage.removeItem(GASTOS_DRAFT_KEY);
   }
 
   function quitarFactura() {
@@ -286,7 +311,7 @@ export default function Gastos({ perfil, userId }) {
           <h1 className="text-xl font-bold text-slate-800">Gastos/Compras</h1>
           <p className="text-sm text-slate-500 mt-0.5">Total: <span className="font-semibold text-red-500">{fmt(total, moneda)}</span></p>
         </div>
-        <button onClick={() => setShowForm(true)}
+        <button onClick={() => { setShowForm(true); setAvisoBorrador(false); }}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
           style={{ backgroundColor: color }}>
           + Agregar
@@ -299,6 +324,14 @@ export default function Gastos({ perfil, userId }) {
             <h3 className="font-bold text-slate-800">Nuevo gasto</h3>
             <p className="text-[10px] text-slate-400 mt-0.5">* Campo obligatorio</p>
           </div>
+
+          {avisoBorrador && (
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+              <span className="text-sm">💾</span>
+              <p className="text-xs text-amber-700 flex-1">Recuperamos tu borrador — la foto no se guardó, agregala de nuevo.</p>
+              <button onClick={() => setAvisoBorrador(false)} className="text-amber-400 hover:text-amber-600 text-xs">✕</button>
+            </div>
+          )}
 
           {/* Tipo de egreso */}
           <div>
@@ -427,7 +460,7 @@ export default function Gastos({ perfil, userId }) {
                   className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
               </div>
             ) : (
-              <button onClick={() => fileInputRef.current?.click()} disabled={uploadingFactura}
+              <button onClick={() => { guardarBorrador(); fileInputRef.current?.click(); }} disabled={uploadingFactura}
                 className="w-full border-2 border-dashed border-slate-200 rounded-xl py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500 disabled:opacity-40 transition-all">
                 {uploadingFactura ? "Subiendo..." : "📷 Adjuntar foto de factura"}
               </button>
