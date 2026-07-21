@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./lib/supabase";
+import { aplicarModoOscuro } from "./utils/modoOscuro";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
@@ -49,6 +50,12 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (perfil && typeof perfil.modo_oscuro !== "undefined") {
+      aplicarModoOscuro(perfil.modo_oscuro);
+    }
+  }, [perfil?.modo_oscuro]);
+
   async function cargarPerfil(userId, mostrarSplash = false) {
     const { data } = await supabase
       .from("perfiles")
@@ -70,10 +77,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-slate-500 text-sm">Cargando AGEP...</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Cargando AGEP...</p>
         </div>
       </div>
     );
@@ -130,7 +137,7 @@ export default function App() {
   }
 
   return (
-    <Layout page={page} setPage={setPage} perfil={perfil}>
+    <Layout page={page} setPage={setPage} perfil={perfil} setPerfil={setPerfil} userId={session.user.id}>
       <PageComponent
         perfil={perfil}
         setPerfil={setPerfil}

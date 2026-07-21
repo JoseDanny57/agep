@@ -77,12 +77,12 @@ export default function Dashboard({ perfil, userId, setPage }) {
   const moneda = perfil?.moneda || "CRC";
   const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.25)}, ${aclararHex(color, 0.97)})`;
 
-  if (loading) return <div className="text-center py-12 text-slate-400">Calculando...</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400 dark:text-slate-500">Calculando...</div>;
 
   return (
     <div className="-mx-4 -mt-5 px-4 pt-5 pb-6 space-y-4" style={{ backgroundImage: fondoDegradado, minHeight: "100vh" }}>
       {/* Mes */}
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider capitalize">{mes.label}</p>
+      <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider capitalize">{mes.label}</p>
 
       {/* Rentabilidad principal */}
       <div className="rounded-2xl p-6 text-white shadow-md" style={{ backgroundColor: color }}>
@@ -98,30 +98,30 @@ export default function Dashboard({ perfil, userId, setPage }) {
 
       {/* Cards ingresos / gastos operativos */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-green-500 text-lg">💰</span>
-            <p className="text-xs font-semibold text-slate-500">INGRESOS</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">INGRESOS</p>
           </div>
-          <p className="text-xl font-bold text-slate-800">{fmt(datos.ingresos, moneda)}</p>
+          <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{fmt(datos.ingresos, moneda)}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-red-400 text-lg">💸</span>
-            <p className="text-xs font-semibold text-slate-500">GASTOS OPERATIVOS</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">GASTOS OPERATIVOS</p>
           </div>
-          <p className="text-xl font-bold text-slate-800">{fmt(datos.gastosOp, moneda)}</p>
+          <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{fmt(datos.gastosOp, moneda)}</p>
         </div>
       </div>
 
       {/* Card capital inicial — informativa, no afecta la utilidad neta del mes */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">🏦</span>
-            <p className="text-xs font-semibold text-slate-500">CAPITAL INICIAL</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">CAPITAL INICIAL</p>
           </div>
-          <p className="text-lg font-bold text-slate-800 truncate">{fmt(datos.capitalInicial, moneda)}</p>
+          <p className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">{fmt(datos.capitalInicial, moneda)}</p>
         </div>
         <button onClick={() => setPage?.("capital")}
           className="text-xs font-semibold rounded-lg px-3 py-2 hover:opacity-90 flex-shrink-0"
@@ -131,21 +131,21 @@ export default function Dashboard({ perfil, userId, setPage }) {
       </div>
 
       {/* Card cuentas por cobrar — saldo pendiente de pedidos activos */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">🧾</span>
-            <p className="text-xs font-semibold text-slate-500">CUENTAS POR COBRAR</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">CUENTAS POR COBRAR</p>
           </div>
           {datos.cuentasPorCobrar !== 0 || datos.saldoFavorTotal > 0 ? (
             <>
-              <p className="text-lg font-bold text-slate-800 truncate">{fmtSaldo(datos.cuentasPorCobrar, moneda)}</p>
+              <p className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">{fmtSaldo(datos.cuentasPorCobrar, moneda)}</p>
               {datos.saldoFavorTotal > 0 && (
                 <p className="text-xs font-semibold text-amber-600 truncate">Saldo a favor: {fmt(datos.saldoFavorTotal, moneda)}</p>
               )}
             </>
           ) : (
-            <p className="text-sm text-slate-400">Sin saldos pendientes</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">Sin saldos pendientes</p>
           )}
         </div>
         <button onClick={() => setPage?.("cuentasPorCobrar")}
@@ -156,13 +156,13 @@ export default function Dashboard({ perfil, userId, setPage }) {
       </div>
 
       {/* Card estadísticas — mini gráfica de utilidad de los últimos 6 meses */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-lg">📈</span>
-          <p className="text-xs font-semibold text-slate-500">UTILIDAD · ÚLTIMOS 6 MESES</p>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">UTILIDAD · ÚLTIMOS 6 MESES</p>
         </div>
         {loadingHistorico ? (
-          <div className="h-16 flex items-center justify-center text-xs text-slate-400">Cargando...</div>
+          <div className="h-16 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">Cargando...</div>
         ) : (
           <div className="h-16">
             <ResponsiveContainer width="100%" height="100%">
@@ -181,61 +181,61 @@ export default function Dashboard({ perfil, userId, setPage }) {
 
       {/* Card retiro — solo si hay retiro ese mes */}
       {datos.retiro > 0 && (
-        <div className="bg-green-50 rounded-2xl p-4 border border-green-100 shadow-sm">
+        <div className="bg-green-50 dark:bg-green-950/40 rounded-2xl p-4 border border-green-100 dark:border-green-800 shadow-sm">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-green-500 text-lg">💵</span>
-            <p className="text-xs font-semibold text-green-700">RETIRO DEL PROPIETARIO</p>
+            <p className="text-xs font-semibold text-green-700 dark:text-green-300">RETIRO DEL PROPIETARIO</p>
           </div>
-          <p className="text-xl font-bold text-green-700">{fmt(datos.retiro, moneda)}</p>
-          <p className="text-[10px] text-green-400 mt-1">Salario del dueño · Resta a la utilidad del mes</p>
+          <p className="text-xl font-bold text-green-700 dark:text-green-300">{fmt(datos.retiro, moneda)}</p>
+          <p className="text-[10px] text-green-400 dark:text-green-500 mt-1">Salario del dueño · Resta a la utilidad del mes</p>
         </div>
       )}
 
       {/* Card materiales — solo si hay compras ese mes */}
       {datos.gastosMat > 0 && (
-        <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100 shadow-sm">
+        <div className="bg-blue-50 dark:bg-blue-950/40 rounded-2xl p-4 border border-blue-100 dark:border-blue-800 shadow-sm">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-blue-400 text-lg">📦</span>
-            <p className="text-xs font-semibold text-blue-600">INVERSIÓN EN MATERIALES</p>
+            <p className="text-xs font-semibold text-blue-600 dark:text-blue-300">INVERSIÓN EN MATERIALES</p>
           </div>
-          <p className="text-xl font-bold text-blue-700">{fmt(datos.gastosMat, moneda)}</p>
-          <p className="text-[10px] text-blue-400 mt-1">No resta a la utilidad · Es inversión en inventario</p>
+          <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{fmt(datos.gastosMat, moneda)}</p>
+          <p className="text-[10px] text-blue-400 dark:text-blue-500 mt-1">No resta a la utilidad · Es inversión en inventario</p>
         </div>
       )}
 
       {/* Card activos — solo si hay compras ese mes */}
       {datos.gastosAct > 0 && (
-        <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100 shadow-sm">
+        <div className="bg-purple-50 dark:bg-purple-950/40 rounded-2xl p-4 border border-purple-100 dark:border-purple-800 shadow-sm">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-purple-400 text-lg">🔧</span>
-            <p className="text-xs font-semibold text-purple-600">COMPRA DE ACTIVOS</p>
+            <p className="text-xs font-semibold text-purple-600 dark:text-purple-300">COMPRA DE ACTIVOS</p>
           </div>
-          <p className="text-xl font-bold text-purple-700">{fmt(datos.gastosAct, moneda)}</p>
-          <p className="text-[10px] text-purple-400 mt-1">No resta a la utilidad · Es inversión en equipos</p>
+          <p className="text-xl font-bold text-purple-700 dark:text-purple-300">{fmt(datos.gastosAct, moneda)}</p>
+          <p className="text-[10px] text-purple-400 dark:text-purple-500 mt-1">No resta a la utilidad · Es inversión en equipos</p>
         </div>
       )}
 
       {/* Sin registros */}
       {datos.ingresos === 0 && datos.gastosOp === 0 && datos.gastosMat === 0 && datos.gastosAct === 0 && datos.retiro === 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
+        <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800 rounded-2xl p-4 text-center">
           <p className="text-2xl mb-2">🎯</p>
-          <p className="font-semibold text-slate-700 text-sm">¡Empieza a registrar!</p>
-          <p className="text-xs text-slate-500 mt-1">Agrega tus primeros ingresos y gastos del mes para ver tu rentabilidad.</p>
+          <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">¡Empieza a registrar!</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Agrega tus primeros ingresos y gastos del mes para ver tu rentabilidad.</p>
         </div>
       )}
 
       {/* Alertas stock bajo */}
       {datos.stockBajo.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-amber-500">⚠️</span>
-            <p className="text-sm font-semibold text-amber-800">Stock bajo</p>
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Stock bajo</p>
           </div>
           <div className="space-y-1.5">
             {datos.stockBajo.map(m => (
               <div key={m.nombre} className="flex justify-between text-xs">
-                <span className="text-amber-700 font-medium">{m.nombre}</span>
-                <span className="text-amber-600">{m.stock_actual} / mín {m.stock_minimo}</span>
+                <span className="text-amber-700 dark:text-amber-300 font-medium">{m.nombre}</span>
+                <span className="text-amber-600 dark:text-amber-400">{m.stock_actual} / mín {m.stock_minimo}</span>
               </div>
             ))}
           </div>

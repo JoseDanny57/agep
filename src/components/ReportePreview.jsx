@@ -44,7 +44,7 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, cargandoExcel
   }
 
   return (
-    <div style={estilos.overlay}>
+    <div style={estilos.overlay} className="bg-[#f4f4f6] dark:bg-slate-900">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -54,9 +54,9 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, cargandoExcel
       `}</style>
 
       {/* Barra superior (no se imprime) */}
-      <div style={estilos.barraSuperior} className="no-print">
+      <div style={estilos.barraSuperior} className="no-print bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <button onClick={onCerrar} style={estilos.botonVolver}>← Volver</button>
-        <span style={estilos.barraTitulo}>Vista previa</span>
+        <span style={estilos.barraTitulo} className="text-[#333] dark:text-slate-200">Vista previa</span>
         <span style={{ width: 60 }} />
       </div>
 
@@ -92,15 +92,15 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, cargandoExcel
       </div>
 
       {/* Barra de acciones (no se imprime) */}
-      <div style={estilos.barraAcciones} className="no-print">
-        <button onClick={handleImprimir} style={estilos.botonSecundario}>
+      <div style={estilos.barraAcciones} className="no-print bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+        <button onClick={handleImprimir} style={estilos.botonSecundario} className="border border-[#ddd] dark:border-slate-600 bg-white dark:bg-slate-800 text-[#333] dark:text-slate-200">
           🖨️ Imprimir
         </button>
         <button onClick={onDescargar} disabled={cargandoPdf} style={{ ...estilos.botonPrimario, backgroundColor: color, opacity: cargandoPdf ? 0.6 : 1 }}>
           {cargandoPdf ? 'Generando...' : '⬇️ Descargar PDF'}
         </button>
         {onExportarExcel && (
-          <button onClick={onExportarExcel} disabled={cargandoExcel} style={{ ...estilos.botonSecundario, opacity: cargandoExcel ? 0.6 : 1 }}>
+          <button onClick={onExportarExcel} disabled={cargandoExcel} style={{ ...estilos.botonSecundario, opacity: cargandoExcel ? 0.6 : 1 }} className="border border-[#ddd] dark:border-slate-600 bg-white dark:bg-slate-800 text-[#333] dark:text-slate-200">
             {cargandoExcel ? 'Generando...' : '📊 Exportar a Excel'}
           </button>
         )}
@@ -462,20 +462,18 @@ function VistaTributario({ datos, moneda, color }) {
 const estilos = {
   overlay: {
     position: 'fixed', inset: 0, zIndex: 60,
-    background: '#f4f4f6',
     display: 'flex', flexDirection: 'column',
   },
   barraSuperior: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '10px 14px',
     paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
-    background: '#fff', borderBottom: '1px solid #e5e5e5',
     flexShrink: 0,
   },
   botonVolver: {
     background: 'none', border: 'none', fontSize: '14px', color: '#2E75B6', fontWeight: 600, cursor: 'pointer',
   },
-  barraTitulo: { fontSize: '14px', fontWeight: 700, color: '#333' },
+  barraTitulo: { fontSize: '14px', fontWeight: 700 },
   contenedorScroll: {
     flex: 1, overflowY: 'auto', padding: '14px',
   },
@@ -506,11 +504,11 @@ const estilos = {
   barraAcciones: {
     display: 'flex', gap: '10px', padding: '12px 14px',
     paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
-    background: '#fff', borderTop: '1px solid #e5e5e5', flexShrink: 0,
+    flexShrink: 0,
   },
   botonSecundario: {
-    flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #ddd',
-    background: '#fff', color: '#333', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+    flex: 1, padding: '12px', borderRadius: '8px',
+    fontSize: '14px', fontWeight: 600, cursor: 'pointer',
   },
   botonPrimario: {
     flex: 1, padding: '12px', borderRadius: '8px', border: 'none',

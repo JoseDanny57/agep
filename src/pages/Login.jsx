@@ -35,34 +35,34 @@ export default function Login({ onDemoClick }) {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-5">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-5">
             {mode === "login" ? "Bienvenido de vuelta" : "Crear cuenta"}
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Correo electrónico</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Correo electrónico</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="tu@correo.com"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Contraseña</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Contraseña</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 onKeyDown={e => e.key === "Enter" && handleSubmit()}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+              <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm text-red-600 dark:text-red-400">
                 {error}
               </div>
             )}

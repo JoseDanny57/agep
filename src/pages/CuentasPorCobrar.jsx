@@ -36,39 +36,39 @@ export default function CuentasPorCobrar({ perfil, userId, onSeleccionarPedido }
   const totalPendiente = filas.reduce((s, p) => s + p.saldo, 0);
   const totalSaldoFavor = filas.reduce((s, p) => s + (p.saldo < 0 ? -p.saldo : 0), 0);
 
-  if (loading) return <div className="text-center py-12 text-slate-400">Cargando...</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400 dark:text-slate-500">Cargando...</div>;
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">Cuentas por Cobrar</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Total pendiente: <span className="font-semibold" style={{ color }}>{fmtSaldo(totalPendiente, moneda)}</span></p>
+        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Cuentas por Cobrar</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Total pendiente: <span className="font-semibold" style={{ color }}>{fmtSaldo(totalPendiente, moneda)}</span></p>
         {totalSaldoFavor > 0 && (
-          <p className="text-sm text-slate-500 mt-0.5">Saldo a favor total: <span className="font-semibold text-amber-600">{fmt(totalSaldoFavor, moneda)}</span></p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Saldo a favor total: <span className="font-semibold text-amber-600 dark:text-amber-400">{fmt(totalSaldoFavor, moneda)}</span></p>
         )}
       </div>
 
       {filas.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">🧾</p>
-          <p className="font-semibold text-slate-600">Sin saldos pendientes</p>
-          <p className="text-sm text-slate-400 mt-1">Los pedidos activos están al día con sus pagos.</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">Sin saldos pendientes</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Los pedidos activos están al día con sus pagos.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           {filas.map((p, idx) => (
             <div key={p.id}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 ${idx < filas.length - 1 ? "border-b border-slate-50" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 ${idx < filas.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}
               onClick={() => onSeleccionarPedido?.(p.id)}>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-800 text-sm truncate">{p.cliente}</p>
-                {p.descripcion && <p className="text-xs text-slate-400 truncate">{p.descripcion}</p>}
-                {p.fecha_entrega && <p className="text-xs text-slate-400">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
+                <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{p.cliente}</p>
+                {p.descripcion && <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{p.descripcion}</p>}
+                {p.fecha_entrega && <p className="text-xs text-slate-400 dark:text-slate-500">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
               </div>
-              <p className={`text-sm font-bold flex-shrink-0 ${p.saldo < 0 ? "text-amber-600" : "text-red-500"}`}>
+              <p className={`text-sm font-bold flex-shrink-0 ${p.saldo < 0 ? "text-amber-600 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}>
                 {fmtSaldo(p.saldo, moneda)}
               </p>
-              <span className="text-slate-300 text-sm">›</span>
+              <span className="text-slate-300 dark:text-slate-600 text-sm">›</span>
             </div>
           ))}
         </div>

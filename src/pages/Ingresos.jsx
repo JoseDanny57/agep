@@ -55,8 +55,8 @@ export default function Ingresos({ perfil, userId }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Ingresos</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Total: <span className="font-semibold text-green-600">{fmt(total, moneda)}</span></p>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Ingresos</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Total: <span className="font-semibold text-green-600 dark:text-green-300">{fmt(total, moneda)}</span></p>
         </div>
         <button onClick={() => setShowForm(true)}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
@@ -67,30 +67,30 @@ export default function Ingresos({ perfil, userId }) {
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-          <h3 className="font-bold text-slate-800">Nuevo ingreso</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">Nuevo ingreso</h3>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
-            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Descripción *</label>
+            <input className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ej: Venta de arreglo floral"
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
-              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monto ({moneda}) *</label>
+              <input type="number" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0" value={form.monto}
                 onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
-              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha</label>
+              <input type="date" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} />
             </div>
           </div>
           <div className="flex gap-3">
             <button onClick={() => setShowForm(false)}
-              className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+              className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
               Cancelar
             </button>
             <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto}
@@ -104,12 +104,12 @@ export default function Ingresos({ perfil, userId }) {
 
       {/* List */}
       {loading ? (
-        <div className="text-center py-12 text-slate-400">Cargando...</div>
+        <div className="text-center py-12 text-slate-400 dark:text-slate-500">Cargando...</div>
       ) : ingresos.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">💰</p>
-          <p className="font-semibold text-slate-600">Sin ingresos registrados</p>
-          <p className="text-sm text-slate-400 mt-1">Agrega tu primera venta o ingreso.</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">Sin ingresos registrados</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Agrega tu primera venta o ingreso.</p>
         </div>
       ) : (
         Object.entries(grupos).map(([mes, items]) => {
@@ -119,24 +119,24 @@ export default function Ingresos({ perfil, userId }) {
           return (
             <div key={mes}>
               <div className="flex justify-between items-center mb-2 px-1">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider capitalize">{labelMes}</p>
-                <p className="text-xs font-bold text-green-600">{fmt(totalMes, moneda)}</p>
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider capitalize">{labelMes}</p>
+                <p className="text-xs font-bold text-green-600 dark:text-green-300">{fmt(totalMes, moneda)}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
+                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                       style={{ backgroundColor: color + "20", color }}>💰</div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                      <p className="text-xs text-slate-400">{new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
+                      <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{item.descripcion}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-green-600 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
+                      <p className="font-bold text-green-600 dark:text-green-300 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
                       {item.origen === "pedido" ? (
-                        <span className="text-slate-300 text-xs" title="Este ingreso viene de un pago registrado en Pedidos. Editalo o eliminalo desde ahí.">🔒</span>
+                        <span className="text-slate-300 dark:text-slate-600 text-xs" title="Este ingreso viene de un pago registrado en Pedidos. Editalo o eliminalo desde ahí.">🔒</span>
                       ) : (
-                        <button onClick={() => eliminar(item.id, item.origen)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                        <button onClick={() => eliminar(item.id, item.origen)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-xs">✕</button>
                       )}
                     </div>
                   </div>

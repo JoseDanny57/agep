@@ -396,20 +396,20 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         {showPagoForm && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
             <div className="absolute inset-0 bg-black/40" onClick={cerrarPagoForm} />
-            <div className="relative bg-white w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
+            <div className="relative bg-white dark:bg-slate-800 w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
               style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
-              <h3 className="font-bold text-slate-800">{pagoEditId ? "Editar pago" : "Registrar pago"}</h3>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">{pagoEditId ? "Editar pago" : "Registrar pago"}</h3>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
-                <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="0" value={pagoForm.monto}
                   onChange={e => setPagoForm(f => ({ ...f, monto: e.target.value }))} />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Método de pago</label>
-                <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 bg-white"
                   value={pagoForm.metodo_pago}
                   onChange={e => setPagoForm(f => ({ ...f, metodo_pago: e.target.value }))}>
                   {Object.entries(METODOS_PAGO).map(([key, label]) => (
@@ -420,13 +420,13 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
-                <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   value={pagoForm.fecha} onChange={e => setPagoForm(f => ({ ...f, fecha: e.target.value }))} />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nota (opcional)</label>
-                <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="Ej: Abono inicial"
                   value={pagoForm.nota} onChange={e => setPagoForm(f => ({ ...f, nota: e.target.value }))} />
               </div>
@@ -450,9 +450,9 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         {showTraslado && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
             <div className="absolute inset-0 bg-black/40" onClick={() => setShowTraslado(false)} />
-            <div className="relative bg-white w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
+            <div className="relative bg-white dark:bg-slate-800 w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
               style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
-              <h3 className="font-bold text-slate-800">Cerrar saldo a favor</h3>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">Cerrar saldo a favor</h3>
               <p className="text-sm text-slate-500">
                 Saldo a favor disponible: <span className="font-bold text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </p>
@@ -461,7 +461,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
               </p>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto a trasladar ({moneda})</label>
-                <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   value={trasladoMonto} max={saldoFavor} min={0}
                   onChange={e => setTrasladoMonto(e.target.value)} />
               </div>
@@ -483,12 +483,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
         <div className="flex items-center gap-3">
           <button onClick={() => setPedidoAbierto(null)} className="text-slate-400 hover:text-slate-600 text-xl">←</button>
-          <h1 className="text-xl font-bold text-slate-800 flex-1">{p.cliente}</h1>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex-1">{p.cliente}</h1>
           <button onClick={() => eliminar(p.id)} className="text-slate-300 hover:text-red-400 text-sm">🗑️</button>
         </div>
 
         {/* Estado */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
           <p className="text-xs font-semibold text-slate-500 mb-3">ESTADO DEL PEDIDO</p>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(ESTADOS).map(([key, cfg]) => (
@@ -501,7 +501,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         </div>
 
         {/* Info */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-2">
           {p.descripcion && <p className="text-sm text-slate-600">{p.descripcion}</p>}
           {p.fecha_entrega && (
             <p className="text-xs text-slate-400">📅 Entrega: {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>
@@ -509,11 +509,11 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         </div>
 
         {/* Financiero */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-3">
           <p className="text-xs font-semibold text-slate-500">RESUMEN FINANCIERO</p>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Precio de venta</span>
-            <span className="font-bold text-slate-800">{p.precio_venta ? fmt(p.precio_venta, moneda) : "—"}</span>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{p.precio_venta ? fmt(p.precio_venta, moneda) : "—"}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Costo de materiales</span>
@@ -526,11 +526,11 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         </div>
 
         {/* Cuentas por cobrar */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-3">
           <p className="text-xs font-semibold text-slate-500">CUENTAS POR COBRAR</p>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Total pagado por el cliente</span>
-            <span className="font-bold text-slate-800">{fmt(totalPagadoCliente, moneda)}</span>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{fmt(totalPagadoCliente, moneda)}</span>
           </div>
           <div className="border-t border-slate-100 pt-2 flex justify-between text-sm items-center">
             {saldoPendiente > 0 && (
@@ -561,7 +561,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         </div>
 
         {/* Pagos */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
             <p className="text-xs font-semibold text-slate-500">PAGOS</p>
             <button onClick={abrirNuevoPago} className="text-xs font-medium hover:opacity-80" style={{ color }}>+ Registrar pago</button>
@@ -603,12 +603,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
         {/* Materiales */}
         {(p.pedido_materiales || []).length > 0 && (
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
             <p className="text-xs font-semibold text-slate-500 px-4 pt-4 pb-2">MATERIALES</p>
             {p.pedido_materiales.map((m, idx) => (
               <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < p.pedido_materiales.length - 1 ? "border-b border-slate-50" : ""}`}>
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{m.nombre_material}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{m.nombre_material}</p>
                   <p className="text-xs text-slate-400">{m.cantidad} × {fmt(m.costo_unitario, moneda)}</p>
                 </div>
                 <p className="text-sm font-bold text-slate-700">{fmt(m.cantidad * m.costo_unitario, moneda)}</p>
@@ -624,7 +624,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Pedidos</h1>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Pedidos</h1>
           <p className="text-sm text-slate-500 mt-0.5">{pedidos.length} pedido{pedidos.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={() => setShowForm(true)}
@@ -636,12 +636,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
       {/* Formulario nuevo pedido */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-          <h3 className="font-bold text-slate-800">Nuevo pedido</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">Nuevo pedido</h3>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Cliente *</label>
-            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Nombre del cliente"
               value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} />
           </div>
@@ -649,7 +649,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           {servicios.length > 0 && (
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Artículo del catálogo (opcional)</label>
-              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 bg-white"
                 value={form.servicio_id}
                 onChange={e => elegirServicio(e.target.value)}>
                 <option value="">Seleccionar artículo...</option>
@@ -661,7 +661,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción (opcional)</label>
-            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="Ej: Arreglo de globos azul y blanco"
               value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           </div>
@@ -669,13 +669,13 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Precio de venta ({moneda})</label>
-              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="0"
                 value={form.precio_venta} onChange={e => setForm(f => ({ ...f, precio_venta: e.target.value }))} />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha de entrega</label>
-              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 value={form.fecha_entrega} onChange={e => setForm(f => ({ ...f, fecha_entrega: e.target.value }))} />
             </div>
           </div>
@@ -701,7 +701,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             {itemsMaterial.map((item, idx) => (
               <div key={idx} className="flex gap-2 mb-2 items-start">
                 <div className="flex-1 space-y-2">
-                  <select className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  <select className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 bg-white"
                     value={item.material_id}
                     onChange={e => actualizarMaterial(idx, "material_id", e.target.value)}>
                     <option value="">Seleccionar material...</option>
@@ -709,17 +709,17 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                     <option value="__manual__">✏️ Ingresar manualmente</option>
                   </select>
                   {item.material_id === "__manual__" && (
-                    <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                       placeholder="Nombre del material"
                       value={item.nombre_material}
                       onChange={e => actualizarMaterial(idx, "nombre_material", e.target.value)} />
                   )}
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                       placeholder="Cantidad"
                       value={item.cantidad}
                       onChange={e => actualizarMaterial(idx, "cantidad", e.target.value)} />
-                    <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                       placeholder="Costo unit."
                       value={item.costo_unitario}
                       onChange={e => actualizarMaterial(idx, "costo_unitario", e.target.value)} />
@@ -766,7 +766,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           <p className="text-sm text-slate-400 mt-1">Creá tu primer pedido.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           {pedidos.map((p, idx) => {
             const costoP = (p.pedido_materiales || []).reduce((s, m) => s + (Number(m.cantidad) * Number(m.costo_unitario)), 0);
             const ganancia = (p.precio_venta || 0) - costoP;
@@ -777,14 +777,14 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                 onClick={() => setPedidoAbierto(p)}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-medium text-slate-800 text-sm truncate">{p.cliente}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{p.cliente}</p>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${est.color}`}>{est.emoji} {est.label}</span>
                   </div>
                   {p.descripcion && <p className="text-xs text-slate-400 truncate">{p.descripcion}</p>}
                   {p.fecha_entrega && <p className="text-xs text-slate-400">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
                 </div>
                 <div className="text-right flex-shrink-0">
-                  {p.precio_venta && <p className="text-sm font-bold text-slate-800">{fmt(p.precio_venta, moneda)}</p>}
+                  {p.precio_venta && <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{fmt(p.precio_venta, moneda)}</p>}
                   {p.precio_venta && costoP > 0 && (
                     <p className={`text-xs font-medium ${ganancia >= 0 ? "text-green-500" : "text-red-500"}`}>
                       {ganancia >= 0 ? "+" : ""}{fmt(ganancia, moneda)}
