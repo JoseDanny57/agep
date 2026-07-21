@@ -328,7 +328,7 @@ export default function Gastos({ perfil, userId }) {
           {avisoBorrador && (
             <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
               <span className="text-sm">💾</span>
-              <p className="text-xs text-amber-700 flex-1">Recuperamos tu borrador — la foto no se guardó, agregala de nuevo.</p>
+              <p className="text-xs text-amber-700 flex-1">Tu dispositivo cerró la app momentáneamente al usar la cámara. Recuperamos lo que estabas escribiendo — solo falta que tomes la foto de nuevo.</p>
               <button onClick={() => setAvisoBorrador(false)} className="text-amber-400 hover:text-amber-600 text-xs">✕</button>
             </div>
           )}
