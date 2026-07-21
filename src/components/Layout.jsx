@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import WhatsAppSupportModal from "./WhatsAppSupportModal";
 
@@ -23,6 +23,15 @@ export default function Layout({ children, page, setPage, perfil }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const color = perfil?.color_principal || "#2E75B6";
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -58,17 +67,17 @@ export default function Layout({ children, page, setPage, perfil }) {
         <div className="fixed inset-0 z-50 flex">
           <div className="bg-black/40 flex-1" onClick={() => setMenuOpen(false)} />
           <div
-            className="w-64 bg-white flex flex-col shadow-xl"
+            className="w-64 h-full max-h-screen bg-white flex flex-col shadow-xl overflow-hidden"
             style={{
               paddingTop: "env(safe-area-inset-top, 0px)",
               paddingBottom: "env(safe-area-inset-bottom, 0px)",
             }}
           >
-            <div className="p-5 border-b border-slate-100" style={{ backgroundColor: color + "15" }}>
+            <div className="p-5 border-b border-slate-100 shrink-0" style={{ backgroundColor: color + "15" }}>
               <p className="font-bold text-slate-800">{perfil?.nombre_negocio}</p>
               <p className="text-xs text-slate-500 mt-0.5">{perfil?.nombre_propietario}</p>
             </div>
-            <nav className="flex-1 p-3 space-y-1">
+            <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1">
               {navItems.map(item => (
                 <button key={item.id}
                   onClick={() => { setPage(item.id); setMenuOpen(false); }}
@@ -91,7 +100,7 @@ export default function Layout({ children, page, setPage, perfil }) {
                 Manual de uso
               </a>
             </nav>
-            <div className="p-3 border-t border-slate-100 space-y-1">
+            <div className="p-3 border-t border-slate-100 space-y-1 shrink-0">
               <button onClick={() => { setShowSupportModal(true); setMenuOpen(false); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-600 hover:bg-slate-100 font-medium">
                 <span>💬</span> Contactar soporte
