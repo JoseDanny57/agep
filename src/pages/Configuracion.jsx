@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import { compressImageIfNeeded } from "../lib/imageCompress";
 import ColorPickerModal from "../components/ColorPickerModal";
 import WhatsAppSupportModal from "../components/WhatsAppSupportModal";
 
@@ -109,21 +110,25 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
       return;
     }
 
-    if (file.size > MAX_SIZE_LOGO) {
-      setLogoError("El archivo supera el tamaño máximo de 2 MB.");
-      e.target.value = "";
-      return;
-    }
-
     setLogoError(null);
     setUploadingLogo(true);
     try {
-      const extension = file.name.split(".").pop();
+      let archivo = file;
+      if (archivo.size > MAX_SIZE_LOGO) {
+        archivo = await compressImageIfNeeded(archivo, { maxSizeBytes: MAX_SIZE_LOGO, maxWidth: 800 });
+      }
+      if (archivo.size > MAX_SIZE_LOGO) {
+        setLogoError("El archivo supera el tamaño máximo de 2 MB.");
+        e.target.value = "";
+        return;
+      }
+
+      const extension = archivo.name.split(".").pop();
       const filePath = `${userId}/logo.${extension}`;
 
       const { error: uploadError } = await supabase.storage
         .from("logos")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, archivo, { upsert: true });
 
       if (uploadError) throw uploadError;
 
