@@ -7,16 +7,49 @@ import WhatsAppSupportModal from "../components/WhatsAppSupportModal";
 const TIPOS_VALIDOS_LOGO = ["image/jpeg", "image/png", "image/gif"];
 const MAX_SIZE_LOGO = 2 * 1024 * 1024; // 2 MB
 
+// Régimen de Tributación Simplificada — Decreto Ejecutivo N° 43881-H
+const ACTIVIDADES_ECONOMICAS = [
+  "Comerciantes minoristas",
+  "Bares, cantinas, tabernas o establecimientos similares",
+  "Elaboración y venta de comidas y bebidas",
+  "Elaboración y venta de repostería y pastelería",
+  "Panaderías",
+  "Pequeños productores agrícolas",
+  "Viveros",
+  "Fabricación artesanal de calzado, maletas, bolsos de mano y artículos similares",
+  "Fabricación artesanal de muebles",
+  "Fabricación de productos metálicos estructurales",
+  "Elaboración de bisutería",
+  "Elaboración de artesanías y obras de arte",
+  "Fabricación de objetos de barro, loza, cerámica y porcelana",
+  "Confección de productos textiles para personas",
+  "Confección de productos textiles y accesorios para mascotas",
+  "Floristerías",
+  "Estudios fotográficos",
+  "Servicios de serigrafía",
+  "Servicios de sublimación",
+  "Pesca artesanal en pequeña escala",
+  "Pesca artesanal en mediana escala",
+  "Transporte remunerado de personas mediante taxi",
+];
+const ACTIVIDAD_OTRA = "__otra__";
+
 export default function Configuracion({ perfil, setPerfil, userId }) {
+  const actividadInicial = perfil?.actividad_economica || "";
+  const esActividadFija = ACTIVIDADES_ECONOMICAS.includes(actividadInicial);
+
   const [form, setForm] = useState({
     nombre_negocio: perfil?.nombre_negocio || "",
     nombre_propietario: perfil?.nombre_propietario || "",
-    actividad_economica: perfil?.actividad_economica || "",
+    actividad_economica: actividadInicial,
     moneda: perfil?.moneda || "CRC",
     tipo_negocio: perfil?.tipo_negocio || "",
     color_principal: perfil?.color_principal || "#2E75B6",
     valor_hora: perfil?.valor_hora || 1583,
   });
+  const [actividadSel, setActividadSel] = useState(
+    actividadInicial && !esActividadFija ? ACTIVIDAD_OTRA : actividadInicial
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [categorias, setCategorias] = useState([]);
@@ -205,9 +238,29 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
         </div>
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1.5">Actividad económica</label>
-          <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ej: Confección de ropa"
-            value={form.actividad_economica} onChange={e => setForm(f => ({ ...f, actividad_economica: e.target.value }))} />
+          <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            value={actividadSel}
+            onChange={e => {
+              const val = e.target.value;
+              setActividadSel(val);
+              if (val === ACTIVIDAD_OTRA) {
+                setForm(f => ({
+                  ...f,
+                  actividad_economica: ACTIVIDADES_ECONOMICAS.includes(f.actividad_economica) ? "" : f.actividad_economica,
+                }));
+              } else {
+                setForm(f => ({ ...f, actividad_economica: val }));
+              }
+            }}>
+            <option value="">Seleccioná una actividad</option>
+            {ACTIVIDADES_ECONOMICAS.map(a => <option key={a} value={a}>{a}</option>)}
+            <option value={ACTIVIDAD_OTRA}>Otra (especificar)</option>
+          </select>
+          {actividadSel === ACTIVIDAD_OTRA && (
+            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Especificá tu actividad económica"
+              value={form.actividad_economica} onChange={e => setForm(f => ({ ...f, actividad_economica: e.target.value }))} />
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
