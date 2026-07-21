@@ -8,6 +8,13 @@ import { cambiarModoOscuro } from "../utils/modoOscuro";
 const TIPOS_VALIDOS_LOGO = ["image/jpeg", "image/png", "image/gif"];
 const MAX_SIZE_LOGO = 2 * 1024 * 1024; // 2 MB
 
+function formatearCRC(valor) {
+  if (valor === "" || valor === null || typeof valor === "undefined") return "";
+  const num = Number(valor);
+  if (Number.isNaN(num)) return String(valor);
+  return `₡${num.toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
+}
+
 // Régimen de Tributación Simplificada — Decreto Ejecutivo N° 43881-H
 const ACTIVIDADES_ECONOMICAS = [
   "Comerciantes minoristas",
@@ -47,6 +54,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
     tipo_negocio: perfil?.tipo_negocio || "",
     color_principal: perfil?.color_principal || "#2E75B6",
     valor_hora: perfil?.valor_hora || 1583,
+    salario_base_vigente: perfil?.salario_base_vigente ?? 462200,
   });
   const [actividadSel, setActividadSel] = useState(
     actividadInicial && !esActividadFija ? ACTIVIDAD_OTRA : actividadInicial
@@ -64,6 +72,8 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [confirmBorrar, setConfirmBorrar] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [editandoValorHora, setEditandoValorHora] = useState(false);
+  const [editandoSalarioBase, setEditandoSalarioBase] = useState(false);
   const fileInputRef = useRef(null);
   const oscuro = !!perfil?.modo_oscuro;
 
@@ -269,6 +279,16 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
           )}
         </div>
 
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Salario base vigente (CRC)</label>
+          <input type="text" inputMode="decimal" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={editandoSalarioBase ? form.salario_base_vigente : formatearCRC(form.salario_base_vigente)}
+            onFocus={() => setEditandoSalarioBase(true)}
+            onBlur={() => setEditandoSalarioBase(false)}
+            onChange={e => setForm(f => ({ ...f, salario_base_vigente: e.target.value }))} />
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Actualizá este valor cuando cambie el salario base (lo publica el Poder Judicial cada año).</p>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Moneda</label>
@@ -293,8 +313,10 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
         {/* Valor hora mano de obra */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Valor por hora de trabajo ({form.moneda})</label>
-          <input type="number" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={form.valor_hora}
+          <input type="text" inputMode="decimal" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={editandoValorHora ? form.valor_hora : formatearCRC(form.valor_hora)}
+            onFocus={() => setEditandoValorHora(true)}
+            onBlur={() => setEditandoValorHora(false)}
             onChange={e => setForm(f => ({ ...f, valor_hora: e.target.value }))} />
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Usado en el Asistente de Costeo · Salario mínimo CR 2025: ₡1,583/hora</p>
         </div>

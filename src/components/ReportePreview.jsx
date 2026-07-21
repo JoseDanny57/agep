@@ -317,6 +317,7 @@ function VistaTributario({ datos, moneda, color }) {
     conFoto = 0,
     sinFoto = 0,
     detalle = [],
+    limiteRegimen,
   } = datos;
 
   return (
@@ -325,6 +326,8 @@ function VistaTributario({ datos, moneda, color }) {
         <div><strong>Actividad económica:</strong> {perfil?.actividad_economica || '—'}</div>
         <div><strong>Fecha de emisión:</strong> {fechaEmision}</div>
       </div>
+
+      {limiteRegimen && <LimiteRegimenBox limiteRegimen={limiteRegimen} moneda={moneda} />}
 
       <div style={estilos.subtituloSeccion}>Resumen del trimestre</div>
       <table style={estilos.tabla}>
@@ -458,6 +461,37 @@ function VistaTributario({ datos, moneda, color }) {
   );
 }
 
+// ── Compras acumuladas del año · Límite Régimen Simplificado ─
+const NIVEL_ESTILOS = {
+  verde: { bg: '#e8f8ee', border: '#bfe8cf', texto: '#00823c', barra: '#22c55e' },
+  amarillo: { bg: '#fff8e1', border: '#f5deA0', texto: '#946c00', barra: '#eab308' },
+  rojo: { bg: '#fdecec', border: '#f5c2c2', texto: '#b41e1e', barra: '#ef4444' },
+};
+
+function LimiteRegimenBox({ limiteRegimen, moneda }) {
+  const { anio, total = 0, limite = 0, porcentaje = 0, nivel = 'verde' } = limiteRegimen;
+  const estilo = NIVEL_ESTILOS[nivel] || NIVEL_ESTILOS.verde;
+  const anchoBarra = Math.min(porcentaje, 100);
+
+  return (
+    <div style={{ ...estilos.cajaLimite, backgroundColor: estilo.bg, borderColor: estilo.border }}>
+      <div style={{ ...estilos.cajaLimiteTitulo, color: estilo.texto }}>
+        Compras acumuladas del año {anio} · Régimen Simplificado
+      </div>
+      <div style={estilos.cajaLimiteFila}>
+        <span>{formatearMonto(total, moneda)}</span>
+        <span>Límite: {formatearMonto(limite, moneda)}</span>
+      </div>
+      <div style={estilos.barraFondo}>
+        <div style={{ ...estilos.barraProgreso, width: `${anchoBarra}%`, backgroundColor: estilo.barra }} />
+      </div>
+      <div style={{ ...estilos.cajaLimitePorcentaje, color: estilo.texto }}>
+        {porcentaje.toFixed(1)}% del límite anual (186 salarios base)
+      </div>
+    </div>
+  );
+}
+
 // ── Estilos ───────────────────────────────────────────────
 const estilos = {
   overlay: {
@@ -492,6 +526,12 @@ const estilos = {
   subtituloReporte: { fontSize: '11px', color: '#888' },
   linea: { borderBottom: '2px solid', margin: '10px 0 16px' },
   infoTrimestre: { display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: '#555', marginBottom: '12px' },
+  cajaLimite: { border: '1px solid', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' },
+  cajaLimiteTitulo: { fontSize: '12px', fontWeight: 700, marginBottom: '6px' },
+  cajaLimiteFila: { display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '6px' },
+  barraFondo: { width: '100%', height: '8px', borderRadius: '4px', backgroundColor: 'rgba(0,0,0,0.08)', overflow: 'hidden' },
+  barraProgreso: { height: '100%', borderRadius: '4px', transition: 'width 0.3s' },
+  cajaLimitePorcentaje: { fontSize: '11px', fontWeight: 600, marginTop: '6px' },
   sinDatos: { fontSize: '12px', color: '#999', fontStyle: 'italic', margin: '4px 0 8px' },
   subtituloSeccion: { fontSize: '12px', fontWeight: 700, color: '#555', margin: '18px 0 6px' },
   tabla: { width: '100%', borderCollapse: 'collapse', fontSize: '12px' },

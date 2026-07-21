@@ -3,6 +3,7 @@ import { ResponsiveContainer, LineChart, Line } from "recharts";
 import { supabase } from "../lib/supabase";
 import { calcularSaldoPendiente } from "../utils/saldoPedido";
 import { ultimosNMeses, cargarDatosMensuales } from "../utils/estadisticas";
+import { totalComprasAnio, estadoLimiteRegimen } from "../utils/limiteRegimenSimplificado";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -32,11 +33,19 @@ function aclararHex(hex, percent) {
 export default function Dashboard({ perfil, userId, setPage }) {
   const [datos, setDatos] = useState({ ingresos: 0, gastosOp: 0, gastosMat: 0, gastosAct: 0, retiro: 0, stockBajo: [], capitalInicial: 0, cuentasPorCobrar: 0, saldoFavorTotal: 0 });
   const [loading, setLoading] = useState(true);
+  const [limiteRegimen, setLimiteRegimen] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [loadingHistorico, setLoadingHistorico] = useState(true);
   const mes = getMes();
 
   useEffect(() => { cargar(); cargarHistorico(); }, []);
+
+  useEffect(() => {
+    (async () => {
+      const totalAnual = await totalComprasAnio(userId);
+      setLimiteRegimen({ total: totalAnual, ...estadoLimiteRegimen(totalAnual, perfil?.salario_base_vigente) });
+    })();
+  }, [userId, perfil?.salario_base_vigente]);
 
   async function cargarHistorico() {
     const data = await cargarDatosMensuales(userId, ultimosNMeses(6));
@@ -222,6 +231,26 @@ export default function Dashboard({ perfil, userId, setPage }) {
           <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">¡Empieza a registrar!</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Agrega tus primeros ingresos y gastos del mes para ver tu rentabilidad.</p>
         </div>
+      )}
+
+      {/* Alerta límite anual Régimen Simplificado — visible si supera 80% */}
+      {limiteRegimen && limiteRegimen.porcentaje > 80 && (
+        <button onClick={() => setPage?.("reportes")}
+          className={`w-full text-left rounded-2xl p-4 border shadow-sm ${
+            limiteRegimen.nivel === "rojo"
+              ? "bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800"
+              : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800"
+          }`}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">{limiteRegimen.nivel === "rojo" ? "🚨" : "⚠️"}</span>
+            <p className={`text-sm font-semibold ${
+              limiteRegimen.nivel === "rojo" ? "text-red-800 dark:text-red-300" : "text-amber-800 dark:text-amber-300"
+            }`}>Límite anual del Régimen Simplificado</p>
+          </div>
+          <p className={`text-xs ${limiteRegimen.nivel === "rojo" ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`}>
+            Llevás {limiteRegimen.porcentaje.toFixed(1)}% de las compras anuales permitidas (186 salarios base). Ver detalle en Reportes →
+          </p>
+        </button>
       )}
 
       {/* Alertas stock bajo */}
