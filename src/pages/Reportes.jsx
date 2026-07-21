@@ -1,13 +1,15 @@
 // src/pages/Reportes.jsx
 // AGEP v4 — Pantalla de Reportes PDF con vista previa
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   generarEstadoResultados,
   generarReportePedidos,
   generarReporteInventario,
+  generarReporteTributario,
 } from '../utils/pdfReports';
+import { generarReporteTributarioExcel } from '../utils/xlsxReports';
 import ReportePreview from '../components/ReportePreview';
 
 const MESES = [
@@ -15,26 +17,72 @@ const MESES = [
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
 ];
 
+const ROMANOS_TRIMESTRE = ['I', 'II', 'III', 'IV'];
+
+const trimestreDeFecha = (fecha) => {
+  const d = new Date(fecha + 'T12:00:00');
+  return { anio: d.getFullYear(), trimestre: Math.floor(d.getMonth() / 3) + 1 };
+};
+
+const rangoTrimestre = (anio, trimestre) => {
+  const mesInicio = (trimestre - 1) * 3;
+  const inicio = `${anio}-${String(mesInicio + 1).padStart(2, '0')}-01`;
+  const fin = new Date(anio, mesInicio + 3, 0).toISOString().split('T')[0];
+  return { inicio, fin };
+};
+
+const etiquetaTrimestre = (t) => `${ROMANOS_TRIMESTRE[t.trimestre - 1]} Trimestre ${t.anio}`;
+
 export default function Reportes() {
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
   const [filtroPedidos, setFiltroPedidos] = useState('todos');
-  const [cargando, setCargando] = useState(null); // 'resultados' | 'pedidos' | 'inventario'
+  const [cargando, setCargando] = useState(null); // 'resultados' | 'pedidos' | 'inventario' | 'tributario'
   const [error, setError] = useState(null);
 
   // Vista previa activa
-  const [vista, setVista] = useState(null); // 'resultados' | 'pedidos' | 'inventario' | null
+  const [vista, setVista] = useState(null); // 'resultados' | 'pedidos' | 'inventario' | 'tributario' | null
   const [datosPreview, setDatosPreview] = useState(null);
   const [descargandoPdf, setDescargandoPdf] = useState(false);
+  const [exportandoExcel, setExportandoExcel] = useState(false);
 
   // Anios disponibles: año actual y 2 anteriores
   const aniosDisponibles = [hoy.getFullYear(), hoy.getFullYear() - 1, hoy.getFullYear() - 2];
 
+  // Trimestre tributario: por defecto el vigente, más los que tengan compras registradas
+  const trimestreActual = trimestreDeFecha(hoy.toISOString().split('T')[0]);
+  const [trimestresDisponibles, setTrimestresDisponibles] = useState([trimestreActual]);
+  const [trimestreSel, setTrimestreSel] = useState(trimestreActual);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('gastos')
+        .select('fecha')
+        .eq('user_id', user.id)
+        .eq('tipo', 'material');
+
+      const mapa = new Map();
+      (data || []).forEach((g) => {
+        const t = trimestreDeFecha(g.fecha);
+        mapa.set(`${t.anio}-${t.trimestre}`, t);
+      });
+      mapa.set(`${trimestreActual.anio}-${trimestreActual.trimestre}`, trimestreActual);
+
+      const lista = Array.from(mapa.values()).sort(
+        (a, b) => b.anio - a.anio || b.trimestre - a.trimestre
+      );
+      setTrimestresDisponibles(lista);
+    })();
+  }, []);
+
   const obtenerPerfil = async (userId) => {
     const { data } = await supabase
       .from('perfiles')
-      .select('nombre_negocio, nombre_propietario, moneda, color_principal, logo_url')
+      .select('nombre_negocio, nombre_propietario, actividad_economica, moneda, color_principal, logo_url')
       .eq('id', userId)
       .single();
     return data;
@@ -155,6 +203,86 @@ export default function Reportes() {
     }
   };
 
+  // ── Reporte Tributario Trimestral: preparar vista previa ────────────
+  const handleReporteTributario = async () => {
+    setCargando('tributario');
+    setError(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const perfil = await obtenerPerfil(user.id);
+
+      const { inicio, fin } = rangoTrimestre(trimestreSel.anio, trimestreSel.trimestre);
+
+      const { data: comprasData } = await supabase
+        .from('gastos')
+        .select('fecha, monto, proveedor, numero_comprobante, tarifa_iva, factura_url, categorias_gastos(nombre)')
+        .eq('user_id', user.id)
+        .eq('tipo', 'material')
+        .gte('fecha', inicio)
+        .lte('fecha', fin)
+        .order('fecha', { ascending: true });
+
+      const compras = comprasData || [];
+      const totalCompras = compras.reduce((acc, c) => acc + Number(c.monto || 0), 0);
+      const cantidadCompras = compras.length;
+      const proveedoresDistintos = new Set(
+        compras.map((c) => (c.proveedor || '').trim() || 'Sin proveedor')
+      ).size;
+      const compraPromedio = cantidadCompras > 0 ? totalCompras / cantidadCompras : 0;
+
+      const porCategoria = new Map();
+      compras.forEach((c) => {
+        const nombre = c.categorias_gastos?.nombre || 'Sin categoría';
+        porCategoria.set(nombre, (porCategoria.get(nombre) || 0) + Number(c.monto || 0));
+      });
+
+      const porTarifa = new Map();
+      compras.forEach((c) => {
+        const tarifa = c.tarifa_iva != null ? Number(c.tarifa_iva) : 0;
+        porTarifa.set(tarifa, (porTarifa.get(tarifa) || 0) + Number(c.monto || 0));
+      });
+
+      const porProveedor = new Map();
+      compras.forEach((c) => {
+        const proveedor = (c.proveedor || '').trim() || 'Sin proveedor';
+        porProveedor.set(proveedor, (porProveedor.get(proveedor) || 0) + Number(c.monto || 0));
+      });
+
+      const conFoto = compras.filter((c) => c.factura_url).length;
+
+      setDatosPreview({
+        perfil,
+        trimestreLabel: etiquetaTrimestre(trimestreSel),
+        fechaEmision: new Date().toLocaleDateString('es-CR'),
+        totalCompras,
+        cantidadCompras,
+        proveedoresDistintos,
+        compraPromedio,
+        totalesPorCategoria: Array.from(porCategoria.entries()).map(([nombre, monto]) => ({ nombre, monto })),
+        totalesPorTarifa: Array.from(porTarifa.entries())
+          .sort((a, b) => a[0] - b[0])
+          .map(([tarifa, monto]) => ({ tarifa, monto })),
+        totalesPorProveedor: Array.from(porProveedor.entries()).map(([proveedor, monto]) => ({ proveedor, monto })),
+        conFoto,
+        sinFoto: cantidadCompras - conFoto,
+        detalle: compras.map((c) => ({
+          fecha: c.fecha,
+          proveedor: c.proveedor,
+          numero_comprobante: c.numero_comprobante,
+          categoria: c.categorias_gastos?.nombre || 'Sin categoría',
+          tarifa_iva: c.tarifa_iva,
+          monto: c.monto,
+        })),
+      });
+      setVista('tributario');
+    } catch (err) {
+      console.error(err);
+      setError('No se pudo generar el Reporte Tributario Trimestral. Intentá de nuevo.');
+    } finally {
+      setCargando(null);
+    }
+  };
+
   // ── Descargar PDF desde la vista previa ─────────────────────────────
   const handleDescargarPdf = async () => {
     setDescargandoPdf(true);
@@ -165,12 +293,29 @@ export default function Reportes() {
         await generarReportePedidos(datosPreview);
       } else if (vista === 'inventario') {
         await generarReporteInventario(datosPreview);
+      } else if (vista === 'tributario') {
+        await generarReporteTributario(datosPreview);
       }
     } catch (err) {
       console.error(err);
       alert('No se pudo descargar el PDF. Intentá de nuevo.');
     } finally {
       setDescargandoPdf(false);
+    }
+  };
+
+  // ── Exportar a Excel desde la vista previa ──────────────────────────
+  const handleExportarExcel = async () => {
+    setExportandoExcel(true);
+    try {
+      if (vista === 'tributario') {
+        generarReporteTributarioExcel(datosPreview);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('No se pudo exportar a Excel. Intentá de nuevo.');
+    } finally {
+      setExportandoExcel(false);
     }
   };
 
@@ -186,8 +331,10 @@ export default function Reportes() {
         tipo={vista}
         datos={datosPreview}
         cargandoPdf={descargandoPdf}
+        cargandoExcel={exportandoExcel}
         onCerrar={cerrarVista}
         onDescargar={handleDescargarPdf}
+        onExportarExcel={vista === 'tributario' ? handleExportarExcel : undefined}
       />
     );
   }
@@ -302,6 +449,43 @@ export default function Reportes() {
           style={{ ...estilos.boton(cargando === 'inventario'), marginTop: '4px' }}
         >
           {cargando === 'inventario' ? 'Cargando...' : 'Ver reporte'}
+        </button>
+      </div>
+
+      {/* ── Tarjeta 4: Reporte Tributario Trimestral ── */}
+      <div style={estilos.tarjeta}>
+        <div style={estilos.tarjetaEncabezado}>
+          <span style={estilos.icono}>🧾</span>
+          <div>
+            <div style={estilos.titulo}>Reporte Tributario Trimestral</div>
+            <div style={estilos.subtitulo}>Compras de material · Régimen Simplificado</div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={estilos.label}>Trimestre</label>
+          <select
+            value={`${trimestreSel.anio}-${trimestreSel.trimestre}`}
+            onChange={(e) => {
+              const [a, t] = e.target.value.split('-').map(Number);
+              setTrimestreSel({ anio: a, trimestre: t });
+            }}
+            style={estilos.select}
+          >
+            {trimestresDisponibles.map((t) => (
+              <option key={`${t.anio}-${t.trimestre}`} value={`${t.anio}-${t.trimestre}`}>
+                {etiquetaTrimestre(t)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={handleReporteTributario}
+          disabled={cargando !== null}
+          style={estilos.boton(cargando === 'tributario')}
+        >
+          {cargando === 'tributario' ? 'Cargando...' : 'Ver reporte'}
         </button>
       </div>
 

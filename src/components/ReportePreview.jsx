@@ -16,7 +16,7 @@ function formatearFecha(fecha) {
   return new Date(fecha + 'T12:00:00').toLocaleDateString('es-CR');
 }
 
-export default function ReportePreview({ tipo, datos, cargandoPdf, onCerrar, onDescargar }) {
+export default function ReportePreview({ tipo, datos, cargandoPdf, cargandoExcel, onCerrar, onDescargar, onExportarExcel }) {
   const perfil = datos?.perfil;
   const color = perfil?.color_principal || '#2E75B6';
   const moneda = perfil?.moneda || 'CRC';
@@ -38,6 +38,9 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, onCerrar, onD
     ).length;
     titulo = 'Reporte de Inventario';
     subtitulo = bajoMinimo > 0 ? `${bajoMinimo} material${bajoMinimo > 1 ? 'es' : ''} bajo stock mínimo` : 'Inventario al día';
+  } else if (tipo === 'tributario') {
+    titulo = 'Reporte Tributario Trimestral – Régimen Simplificado';
+    subtitulo = datos.trimestreLabel;
   }
 
   return (
@@ -80,6 +83,7 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, onCerrar, onD
           {tipo === 'resultados' && <VistaResultados datos={datos} moneda={moneda} color={color} />}
           {tipo === 'pedidos' && <VistaPedidos datos={datos} moneda={moneda} color={color} />}
           {tipo === 'inventario' && <VistaInventario datos={datos} moneda={moneda} color={color} />}
+          {tipo === 'tributario' && <VistaTributario datos={datos} moneda={moneda} color={color} />}
 
           <div style={estilos.pie}>
             Generado con AGEP • {new Date().toLocaleDateString('es-CR')}
@@ -95,6 +99,11 @@ export default function ReportePreview({ tipo, datos, cargandoPdf, onCerrar, onD
         <button onClick={onDescargar} disabled={cargandoPdf} style={{ ...estilos.botonPrimario, backgroundColor: color, opacity: cargandoPdf ? 0.6 : 1 }}>
           {cargandoPdf ? 'Generando...' : '⬇️ Descargar PDF'}
         </button>
+        {onExportarExcel && (
+          <button onClick={onExportarExcel} disabled={cargandoExcel} style={{ ...estilos.botonSecundario, opacity: cargandoExcel ? 0.6 : 1 }}>
+            {cargandoExcel ? 'Generando...' : '📊 Exportar a Excel'}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -293,6 +302,162 @@ function VistaInventario({ datos, moneda, color }) {
   );
 }
 
+// ── Reporte Tributario Trimestral ────────────────────────
+function VistaTributario({ datos, moneda, color }) {
+  const {
+    perfil,
+    fechaEmision,
+    totalCompras = 0,
+    cantidadCompras = 0,
+    proveedoresDistintos = 0,
+    compraPromedio = 0,
+    totalesPorCategoria = [],
+    totalesPorTarifa = [],
+    totalesPorProveedor = [],
+    conFoto = 0,
+    sinFoto = 0,
+    detalle = [],
+  } = datos;
+
+  return (
+    <>
+      <div style={estilos.infoTrimestre}>
+        <div><strong>Actividad económica:</strong> {perfil?.actividad_economica || '—'}</div>
+        <div><strong>Fecha de emisión:</strong> {fechaEmision}</div>
+      </div>
+
+      <div style={estilos.subtituloSeccion}>Resumen del trimestre</div>
+      <table style={estilos.tabla}>
+        <thead>
+          <tr style={{ backgroundColor: color }}>
+            <th style={estilos.th}>Concepto</th>
+            <th style={{ ...estilos.th, textAlign: 'right' }}>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style={estilos.td}>Compras del trimestre</td><td style={estilos.tdDer}>{formatearMonto(totalCompras, moneda)}</td></tr>
+          <tr style={estilos.filaAlterna}><td style={estilos.td}>Cantidad de compras</td><td style={estilos.tdDer}>{cantidadCompras}</td></tr>
+          <tr><td style={estilos.td}>Proveedores diferentes</td><td style={estilos.tdDer}>{proveedoresDistintos}</td></tr>
+          <tr style={estilos.filaAlterna}><td style={estilos.td}>Compra promedio</td><td style={estilos.tdDer}>{formatearMonto(compraPromedio, moneda)}</td></tr>
+        </tbody>
+      </table>
+
+      <div style={estilos.subtituloSeccion}>Totales por categoría</div>
+      {totalesPorCategoria.length === 0 ? (
+        <p style={estilos.sinDatos}>Sin compras registradas en este trimestre.</p>
+      ) : (
+        <table style={estilos.tabla}>
+          <thead>
+            <tr style={{ backgroundColor: color }}>
+              <th style={estilos.th}>Categoría</th>
+              <th style={{ ...estilos.th, textAlign: 'right' }}>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {totalesPorCategoria.map((c, i) => (
+              <tr key={c.nombre} style={i % 2 ? estilos.filaAlterna : undefined}>
+                <td style={estilos.td}>{c.nombre}</td>
+                <td style={estilos.tdDer}>{formatearMonto(c.monto, moneda)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div style={estilos.subtituloSeccion}>Totales por tarifa de IVA</div>
+      {totalesPorTarifa.length === 0 ? (
+        <p style={estilos.sinDatos}>Sin compras registradas en este trimestre.</p>
+      ) : (
+        <table style={estilos.tabla}>
+          <thead>
+            <tr style={{ backgroundColor: color }}>
+              <th style={estilos.th}>Tarifa</th>
+              <th style={{ ...estilos.th, textAlign: 'right' }}>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {totalesPorTarifa.map((t, i) => (
+              <tr key={t.tarifa} style={i % 2 ? estilos.filaAlterna : undefined}>
+                <td style={estilos.td}>{t.tarifa}%</td>
+                <td style={estilos.tdDer}>{formatearMonto(t.monto, moneda)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div style={estilos.subtituloSeccion}>Totales por proveedor</div>
+      {totalesPorProveedor.length === 0 ? (
+        <p style={estilos.sinDatos}>Sin compras registradas en este trimestre.</p>
+      ) : (
+        <table style={estilos.tabla}>
+          <thead>
+            <tr style={{ backgroundColor: color }}>
+              <th style={estilos.th}>Proveedor</th>
+              <th style={{ ...estilos.th, textAlign: 'right' }}>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {totalesPorProveedor.map((p, i) => (
+              <tr key={p.proveedor} style={i % 2 ? estilos.filaAlterna : undefined}>
+                <td style={estilos.td}>{p.proveedor}</td>
+                <td style={estilos.tdDer}>{formatearMonto(p.monto, moneda)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div style={estilos.subtituloSeccion}>Respaldo documental</div>
+      <table style={estilos.tabla}>
+        <thead>
+          <tr style={{ backgroundColor: '#787878' }}>
+            <th style={estilos.th}>Concepto</th>
+            <th style={{ ...estilos.th, textAlign: 'right' }}>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style={estilos.td}>Compras registradas</td><td style={estilos.tdDer}>{cantidadCompras}</td></tr>
+          <tr style={estilos.filaAlterna}><td style={estilos.td}>Compras con fotografía del comprobante</td><td style={estilos.tdDer}>{conFoto}</td></tr>
+          <tr><td style={estilos.td}>Compras sin respaldo digital</td><td style={estilos.tdDer}>{sinFoto}</td></tr>
+        </tbody>
+      </table>
+
+      <div style={{ ...estilos.subtituloSeccion, marginTop: '24px' }}>Detalle de compras</div>
+      {detalle.length === 0 ? (
+        <p style={estilos.sinDatos}>Sin compras registradas en este trimestre.</p>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ ...estilos.tabla, minWidth: 640 }}>
+            <thead>
+              <tr style={{ backgroundColor: color }}>
+                <th style={estilos.th}>Fecha</th>
+                <th style={estilos.th}>Proveedor</th>
+                <th style={estilos.th}>N.° de comprobante</th>
+                <th style={estilos.th}>Categoría</th>
+                <th style={{ ...estilos.th, textAlign: 'right' }}>Tarifa IVA</th>
+                <th style={{ ...estilos.th, textAlign: 'right' }}>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detalle.map((d, i) => (
+                <tr key={i} style={i % 2 ? estilos.filaAlterna : undefined}>
+                  <td style={estilos.td}>{formatearFecha(d.fecha)}</td>
+                  <td style={estilos.td}>{d.proveedor || '—'}</td>
+                  <td style={estilos.td}>{d.numero_comprobante || '—'}</td>
+                  <td style={estilos.td}>{d.categoria}</td>
+                  <td style={estilos.tdDer}>{d.tarifa_iva != null ? `${d.tarifa_iva}%` : '—'}</td>
+                  <td style={estilos.tdDer}>{formatearMonto(d.monto, moneda)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── Estilos ───────────────────────────────────────────────
 const estilos = {
   overlay: {
@@ -328,6 +493,8 @@ const estilos = {
   tituloReporte: { fontSize: '18px', fontWeight: 700 },
   subtituloReporte: { fontSize: '11px', color: '#888' },
   linea: { borderBottom: '2px solid', margin: '10px 0 16px' },
+  infoTrimestre: { display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: '#555', marginBottom: '12px' },
+  sinDatos: { fontSize: '12px', color: '#999', fontStyle: 'italic', margin: '4px 0 8px' },
   subtituloSeccion: { fontSize: '12px', fontWeight: 700, color: '#555', margin: '18px 0 6px' },
   tabla: { width: '100%', borderCollapse: 'collapse', fontSize: '12px' },
   th: { padding: '8px 10px', textAlign: 'left', color: '#fff', fontSize: '11px' },
