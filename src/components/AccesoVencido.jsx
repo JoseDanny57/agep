@@ -15,11 +15,11 @@ export default function AccesoVencido() {
           <h1 className="text-3xl font-bold text-white tracking-tight">AGEP</h1>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-          <h2 className="text-lg font-bold text-slate-800 mb-2">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 text-center">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
             Tu acceso a AGEP ha vencido
           </h2>
-          <p className="text-sm text-slate-500 mb-5">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
             Tranquilo, tus datos están guardados y seguros. Contáctanos por WhatsApp para renovar tu acceso y seguir usando AGEP.
           </p>
 
@@ -31,7 +31,7 @@ export default function AccesoVencido() {
 
           <button
             onClick={() => supabase.auth.signOut()}
-            className="w-full mt-3 text-slate-400 font-medium text-sm hover:text-slate-600">
+            className="w-full mt-3 text-slate-400 dark:text-slate-500 font-medium text-sm hover:text-slate-600 dark:hover:text-slate-300">
             Cerrar sesión
           </button>
         </div>

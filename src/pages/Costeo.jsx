@@ -75,25 +75,25 @@ export default function Costeo({ perfil, userId }) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">Asistente de Costeo</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Calculá el precio justo para tu producto o servicio</p>
+        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Asistente de Costeo</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Calculá el precio justo para tu producto o servicio</p>
       </div>
 
       {/* Nombre del producto */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <label className="block text-xs font-semibold text-slate-600 mb-1.5">¿Qué estás costeando?</label>
-        <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5">
+        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">¿Qué estás costeando?</label>
+        <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
           placeholder="Ej: Arreglo de globos para cumpleaños"
           value={nombreProducto}
           onChange={e => setNombreProducto(e.target.value)} />
       </div>
 
       {/* Paso 1 — Materiales */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-bold text-slate-800 text-sm">Paso 1 · Materiales</p>
-            <p className="text-xs text-slate-400 mt-0.5">¿Qué insumos necesitás?</p>
+            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">Paso 1 · Materiales</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">¿Qué insumos necesitás?</p>
           </div>
           <button onClick={agregarMaterial} className="text-xs font-medium px-3 py-1.5 rounded-lg text-white hover:opacity-90" style={{ backgroundColor: color }}>
             + Agregar
@@ -101,45 +101,45 @@ export default function Costeo({ perfil, userId }) {
         </div>
 
         {items.length === 0 && (
-          <p className="text-xs text-slate-400 text-center py-3">Sin materiales — tocá Agregar para empezar</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-3">Sin materiales — tocá Agregar para empezar</p>
         )}
 
         {items.map((item, idx) => (
-          <div key={idx} className="space-y-2 border border-slate-100 rounded-xl p-3">
+          <div key={idx} className="space-y-2 border border-slate-100 dark:border-slate-700 rounded-xl p-3">
             <div className="flex items-center gap-2">
-              <select className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              <select className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                 value={item.material_id}
                 onChange={e => actualizarItem(idx, "material_id", e.target.value)}>
                 <option value="">Seleccionar material...</option>
                 {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                 <option value="__manual__">✏️ Ingresar manualmente</option>
               </select>
-              <button onClick={() => quitarItem(idx)} className="text-slate-300 hover:text-red-400 text-sm flex-shrink-0">✕</button>
+              <button onClick={() => quitarItem(idx)} className="text-slate-300 hover:text-red-400 dark:text-slate-600 text-sm flex-shrink-0">✕</button>
             </div>
             {item.material_id === "__manual__" && (
-              <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Nombre del material"
                 value={item.nombre_material}
                 onChange={e => actualizarItem(idx, "nombre_material", e.target.value)} />
             )}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">Cantidad</label>
-                <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label className="text-[10px] text-slate-400 dark:text-slate-500 mb-1 block">Cantidad</label>
+                <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="0"
                   value={item.cantidad}
                   onChange={e => actualizarItem(idx, "cantidad", e.target.value)} />
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 mb-1 block">Costo unitario ({moneda})</label>
-                <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label className="text-[10px] text-slate-400 dark:text-slate-500 mb-1 block">Costo unitario ({moneda})</label>
+                <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="0"
                   value={item.costo_unitario}
                   onChange={e => actualizarItem(idx, "costo_unitario", e.target.value)} />
               </div>
             </div>
             {item.cantidad && item.costo_unitario && (
-              <p className="text-xs text-slate-500 text-right">
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-right">
                 Subtotal: <span className="font-semibold">{fmt(Number(item.cantidad) * Number(item.costo_unitario), moneda)}</span>
               </p>
             )}
@@ -147,66 +147,66 @@ export default function Costeo({ perfil, userId }) {
         ))}
 
         {costoMateriales > 0 && (
-          <div className="flex justify-between text-sm border-t border-slate-100 pt-2">
-            <span className="text-slate-500">Total materiales</span>
-            <span className="font-bold text-slate-800">{fmt(costoMateriales, moneda)}</span>
+          <div className="flex justify-between text-sm border-t border-slate-100 dark:border-slate-700 pt-2">
+            <span className="text-slate-500 dark:text-slate-400">Total materiales</span>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{fmt(costoMateriales, moneda)}</span>
           </div>
         )}
       </div>
 
       {/* Paso 2 — Mano de obra */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-3">
         <div>
-          <p className="font-bold text-slate-800 text-sm">Paso 2 · Tu tiempo</p>
-          <p className="text-xs text-slate-400 mt-0.5">¿Cuánto vale tu trabajo?</p>
+          <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">Paso 2 · Tu tiempo</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">¿Cuánto vale tu trabajo?</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Horas de trabajo</label>
-            <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Horas de trabajo</label>
+            <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="0"
               value={horas}
               onChange={e => setHoras(e.target.value)} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Valor por hora ({moneda})</label>
-            <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Valor por hora ({moneda})</label>
+            <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               value={valorHora}
               onChange={e => setValorHora(e.target.value)} />
-            <p className="text-[10px] text-slate-400 mt-1">Configurable en ⚙️ Config</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Configurable en ⚙️ Config</p>
           </div>
         </div>
         {costoManoObra > 0 && (
-          <div className="flex justify-between text-sm border-t border-slate-100 pt-2">
-            <span className="text-slate-500">Total mano de obra</span>
-            <span className="font-bold text-slate-800">{fmt(costoManoObra, moneda)}</span>
+          <div className="flex justify-between text-sm border-t border-slate-100 dark:border-slate-700 pt-2">
+            <span className="text-slate-500 dark:text-slate-400">Total mano de obra</span>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{fmt(costoManoObra, moneda)}</span>
           </div>
         )}
       </div>
 
       {/* Paso 3 — Margen */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-3">
         <div>
-          <p className="font-bold text-slate-800 text-sm">Paso 3 · Margen de ganancia</p>
-          <p className="text-xs text-slate-400 mt-0.5">AGEP recomienda 30% para emprendimientos pequeños</p>
+          <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">Paso 3 · Margen de ganancia</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">AGEP recomienda 30% para emprendimientos pequeños</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           {MARGENES.map(m => (
             <button key={m}
               onClick={() => { setMargen(m); setMargenCustom(""); }}
               className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                margenCustom === "" && margen === m ? "text-white" : "border-slate-200 text-slate-500"
+                margenCustom === "" && margen === m ? "text-white" : "border-slate-200 text-slate-500 dark:border-slate-700 dark:text-slate-400"
               }`}
               style={margenCustom === "" && margen === m ? { backgroundColor: color, borderColor: color } : {}}>
               {m}%{m === 30 ? " ★" : ""}
             </button>
           ))}
           <div className="flex items-center gap-1">
-            <input type="number" className="w-16 border border-slate-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <input type="number" className="w-16 border border-slate-200 rounded-xl px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder="otro"
               value={margenCustom}
               onChange={e => setMargenCustom(e.target.value)} />
-            <span className="text-sm text-slate-400">%</span>
+            <span className="text-sm text-slate-400 dark:text-slate-500">%</span>
           </div>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function Costeo({ perfil, userId }) {
       {/* Botón resetear */}
       {(items.length > 0 || horas || String(valorHora) !== String(perfil?.valor_hora || 1583)) && (
         <button onClick={resetear}
-          className="w-full border border-slate-200 text-slate-500 font-medium rounded-xl py-3 text-sm hover:bg-slate-50">
+          className="w-full border border-slate-200 text-slate-500 font-medium rounded-xl py-3 text-sm hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700">
           🔄 Calcular otro producto
         </button>
       )}

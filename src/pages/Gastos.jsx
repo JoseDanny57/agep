@@ -234,10 +234,10 @@ export default function Gastos({ perfil, userId }) {
   }, {});
 
   const tipoConfig = {
-    operativo: { emoji: "💼", label: "Gasto operativo",      color: "border-blue-500 text-blue-600 bg-blue-50",     bg: "#fef2f2" },
-    material:  { emoji: "📦", label: "Compra de material",   color: "border-amber-500 text-amber-600 bg-amber-50",  bg: "#fef3c7" },
-    activo:    { emoji: "🔧", label: "Compra de activo",     color: "border-purple-500 text-purple-600 bg-purple-50", bg: "#f5f3ff" },
-    retiro:    { emoji: "💵", label: "Retiro del propietario", color: "border-green-500 text-green-600 bg-green-50", bg: "#f0fdf4" },
+    operativo: { emoji: "💼", label: "Gasto operativo",      color: "border-blue-500 text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40",     bg: "#fef2f2" },
+    material:  { emoji: "📦", label: "Compra de material",   color: "border-amber-500 text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40",  bg: "#fef3c7" },
+    activo:    { emoji: "🔧", label: "Compra de activo",     color: "border-purple-500 text-purple-600 bg-purple-50 dark:text-purple-300 dark:bg-purple-950/40", bg: "#f5f3ff" },
+    retiro:    { emoji: "💵", label: "Retiro del propietario", color: "border-green-500 text-green-600 bg-green-50 dark:text-green-300 dark:bg-green-950/40", bg: "#f0fdf4" },
   };
 
   return (
@@ -246,11 +246,11 @@ export default function Gastos({ perfil, userId }) {
       {/* Modal nueva categoría */}
       {showCategoriaModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={cancelarNuevaCategoria}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-slate-800">Nueva categoría</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Nueva categoría</h3>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre</label>
-              <input autoFocus className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nombre</label>
+              <input autoFocus className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="Ej: Insumos"
                 value={nuevaCategoriaNombre}
                 onChange={e => setNuevaCategoriaNombre(e.target.value)}
@@ -258,7 +258,7 @@ export default function Gastos({ perfil, userId }) {
             </div>
             <div className="flex gap-3">
               <button onClick={cancelarNuevaCategoria}
-                className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+                className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
                 Cancelar
               </button>
               <button onClick={crearCategoria} disabled={guardandoCategoria || !nuevaCategoriaNombre.trim()}
@@ -274,9 +274,9 @@ export default function Gastos({ perfil, userId }) {
       {/* Modal explicativo: Compra de material */}
       {showCompraModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowCompraModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-slate-800">¿Qué cuenta como Compra?</h3>
-            <div className="text-sm text-slate-600 space-y-2">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">¿Qué cuenta como Compra?</h3>
+            <div className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
               <p>Para el Régimen Simplificado, registrá aquí:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Mercadería para la venta</li>
@@ -308,8 +308,8 @@ export default function Gastos({ perfil, userId }) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Gastos/Compras</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Total: <span className="font-semibold text-red-500">{fmt(total, moneda)}</span></p>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Gastos/Compras</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Total: <span className="font-semibold text-red-500 dark:text-red-400">{fmt(total, moneda)}</span></p>
         </div>
         <button onClick={() => { setShowForm(true); setAvisoBorrador(false); }}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
@@ -319,46 +319,46 @@ export default function Gastos({ perfil, userId }) {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
           <div>
-            <h3 className="font-bold text-slate-800">Nuevo gasto</h3>
-            <p className="text-[10px] text-slate-400 mt-0.5">* Campo obligatorio</p>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Nuevo gasto</h3>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">* Campo obligatorio</p>
           </div>
 
           {avisoBorrador && (
-            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+            <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2.5">
               <span className="text-sm">💾</span>
-              <p className="text-xs text-amber-700 flex-1">Tu dispositivo cerró la app momentáneamente al usar la cámara. Recuperamos lo que estabas escribiendo — solo falta que tomes la foto de nuevo.</p>
-              <button onClick={() => setAvisoBorrador(false)} className="text-amber-400 hover:text-amber-600 text-xs">✕</button>
+              <p className="text-xs text-amber-700 dark:text-amber-300 flex-1">Tu dispositivo cerró la app momentáneamente al usar la cámara. Recuperamos lo que estabas escribiendo — solo falta que tomes la foto de nuevo.</p>
+              <button onClick={() => setAvisoBorrador(false)} className="text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300 text-xs">✕</button>
             </div>
           )}
 
           {/* Tipo de egreso */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo de egreso</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Tipo de egreso</label>
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(tipoConfig).map(([key, cfg]) => (
                 <button key={key}
                   onClick={() => seleccionarTipo(key)}
-                  className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 text-slate-500"}`}>
+                  className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 text-slate-500 dark:border-slate-700 dark:text-slate-400"}`}>
                   {cfg.emoji} {cfg.label}
                 </button>
               ))}
             </div>
             {form.tipo === "activo" && (
-              <p className="text-[10px] text-purple-400 mt-1.5">Equipos, herramientas o mobiliario — no resta a la utilidad del mes.</p>
+              <p className="text-[10px] text-purple-400 dark:text-purple-300 mt-1.5">Equipos, herramientas o mobiliario — no resta a la utilidad del mes.</p>
             )}
             {form.tipo === "material" && (
-              <p className="text-[10px] text-amber-400 mt-1.5">Materias primas e insumos — no resta a la utilidad del mes.</p>
+              <p className="text-[10px] text-amber-400 dark:text-amber-300 mt-1.5">Materias primas e insumos — no resta a la utilidad del mes.</p>
             )}
             {form.tipo === "retiro" && (
-              <p className="text-[10px] text-green-500 mt-1.5">Salario o retiro del dueño — sí resta a la utilidad del mes.</p>
+              <p className="text-[10px] text-green-500 dark:text-green-400 mt-1.5">Salario o retiro del dueño — sí resta a la utilidad del mes.</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
-            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Descripción *</label>
+            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
               placeholder={
                 form.tipo === "material" ? "Ej: Tela para vestidos" :
                 form.tipo === "activo"   ? "Ej: Selladora industrial" :
@@ -370,22 +370,22 @@ export default function Gastos({ perfil, userId }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
-              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monto ({moneda}) *</label>
+              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="0" value={form.monto}
                 onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} />
-              <p className="text-[10px] text-slate-400 mt-1">El monto debe incluir el IVA</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">El monto debe incluir el IVA</p>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
-              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha</label>
+              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Categoría *</label>
-            <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Categoría *</label>
+            <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
               value={form.categoria_id} onChange={handleCategoriaChange}>
               <option value="">Seleccioná una categoría</option>
               {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
@@ -394,17 +394,17 @@ export default function Gastos({ perfil, userId }) {
           </div>
 
           {(form.tipo === "material" || form.tipo === "activo") && (
-            <div className="space-y-3 border-t border-slate-100 pt-4">
+            <div className="space-y-3 border-t border-slate-100 dark:border-slate-700 pt-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Proveedor *</label>
-                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Proveedor *</label>
+                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                     placeholder="Ej: Textiles ABC"
                     value={form.proveedor} onChange={e => setForm(f => ({ ...f, proveedor: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">N.° de comprobante *</label>
-                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">N.° de comprobante *</label>
+                  <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                     placeholder="Ej: F-00123"
                     value={form.numero_comprobante} onChange={e => setForm(f => ({ ...f, numero_comprobante: e.target.value }))} />
                 </div>
@@ -412,8 +412,8 @@ export default function Gastos({ perfil, userId }) {
 
               {form.tipo === "material" && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tarifa de IVA (%)</label>
-                  <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Tarifa de IVA (%)</label>
+                  <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                     value={form.tarifa_iva} onChange={e => setForm(f => ({ ...f, tarifa_iva: e.target.value }))}>
                     <option value="0">0% (Exento)</option>
                     <option value="1">1%</option>
@@ -424,8 +424,8 @@ export default function Gastos({ perfil, userId }) {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Observaciones (opcional)</label>
-                <textarea rows={2} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Observaciones (opcional)</label>
+                <textarea rows={2} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                   placeholder="Notas adicionales"
                   value={form.observaciones} onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))} />
               </div>
@@ -434,34 +434,34 @@ export default function Gastos({ perfil, userId }) {
 
           {/* Foto de factura */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Foto de factura (opcional)</label>
-            <p className="text-[10px] text-slate-400 mb-2">JPG, PNG, GIF o PDF · Máx. 5 MB</p>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Foto de factura (opcional)</label>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2">JPG, PNG, GIF o PDF · Máx. 5 MB</p>
             <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.gif,.pdf" className="hidden" onChange={subirFactura} />
             {facturaError && (
-              <p className="text-xs text-red-500 mb-2">⚠️ {facturaError}</p>
+              <p className="text-xs text-red-500 dark:text-red-400 mb-2">⚠️ {facturaError}</p>
             )}
             {facturaUrl && facturaEsPdf ? (
               <div className="relative">
                 <a href={facturaUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 hover:bg-slate-100">
+                  className="flex items-center gap-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-700">
                   <span className="text-2xl">📄</span>
-                  <span className="text-sm text-slate-600 truncate">{facturaNombre}</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-300 truncate">{facturaNombre}</span>
                 </a>
-                <p className="text-[10px] text-slate-400 text-center mt-1">Tocá para abrir el PDF</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1">Tocá para abrir el PDF</p>
                 <button onClick={quitarFactura}
-                  className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
+                  className="absolute top-2 right-2 bg-white dark:bg-slate-800 rounded-full w-6 h-6 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-400 shadow text-xs">✕</button>
               </div>
             ) : facturaPreview ? (
               <div className="relative">
-                <img src={facturaPreview} alt="Factura" className="w-full h-24 object-contain rounded-xl border border-slate-200 bg-slate-50 cursor-pointer"
+                <img src={facturaPreview} alt="Factura" className="w-full h-24 object-contain rounded-xl border border-slate-200 bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900"
                   onClick={() => setViendoFactura(facturaPreview)} />
-                <p className="text-[10px] text-slate-400 text-center mt-1">Tocá la imagen para verla completa</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1">Tocá la imagen para verla completa</p>
                 <button onClick={quitarFactura}
-                  className="absolute top-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-400 shadow text-xs">✕</button>
+                  className="absolute top-2 right-2 bg-white dark:bg-slate-800 rounded-full w-6 h-6 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-400 shadow text-xs">✕</button>
               </div>
             ) : (
               <button onClick={() => { guardarBorrador(); fileInputRef.current?.click(); }} disabled={uploadingFactura}
-                className="w-full border-2 border-dashed border-slate-200 rounded-xl py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500 disabled:opacity-40 transition-all">
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-500 disabled:opacity-40 transition-all dark:border-slate-600 dark:text-slate-500 dark:hover:border-slate-500 dark:hover:text-slate-300">
                 {uploadingFactura ? "Subiendo..." : "📷 Adjuntar foto de factura"}
               </button>
             )}
@@ -469,7 +469,7 @@ export default function Gastos({ perfil, userId }) {
 
           <div className="flex gap-3">
             <button onClick={resetForm}
-              className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+              className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
               Cancelar
             </button>
             <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra}
@@ -482,12 +482,12 @@ export default function Gastos({ perfil, userId }) {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-slate-400">Cargando...</div>
+        <div className="text-center py-12 text-slate-400 dark:text-slate-500">Cargando...</div>
       ) : gastos.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">💸</p>
-          <p className="font-semibold text-slate-600">Sin gastos registrados</p>
-          <p className="text-sm text-slate-400 mt-1">Registra tus egresos del mes.</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">Sin gastos registrados</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Registra tus egresos del mes.</p>
         </div>
       ) : (
         Object.entries(grupos).map(([mes, items]) => {
@@ -497,33 +497,33 @@ export default function Gastos({ perfil, userId }) {
           return (
             <div key={mes}>
               <div className="flex justify-between items-center mb-2 px-1">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider capitalize">{labelMes}</p>
-                <p className="text-xs font-bold text-red-500">{fmt(totalMes, moneda)}</p>
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider capitalize">{labelMes}</p>
+                <p className="text-xs font-bold text-red-500 dark:text-red-400">{fmt(totalMes, moneda)}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
+                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                       style={{ backgroundColor: tipoConfig[item.tipo]?.bg || "#fef2f2" }}>
                       {tipoConfig[item.tipo]?.emoji || "💸"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                      <p className="text-xs text-slate-400 flex items-center gap-1 flex-wrap">
+                      <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{item.descripcion}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1 flex-wrap">
                         {new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}
-                        {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px]">Material</span>}
-                        {item.tipo === "activo"   && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px]">Activo</span>}
-                        {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px]">Retiro</span>}
-                        {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
+                        {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-amber-900/40 dark:text-amber-400">Material</span>}
+                        {item.tipo === "activo"   && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-purple-900/40 dark:text-purple-300">Activo</span>}
+                        {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-green-900/40 dark:text-green-300">Retiro</span>}
+                        {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] dark:bg-slate-700 dark:text-slate-400">{item.categorias_gastos.nombre}</span>}
                         {item.factura_url && (
                           <button onClick={() => setViendoFactura(item.factura_url)}
-                            className="text-blue-400 hover:text-blue-600 text-[10px]">📄 Ver factura</button>
+                            className="text-blue-400 hover:text-blue-600 text-[10px] dark:hover:text-blue-300">📄 Ver factura</button>
                         )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-red-500 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
-                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                      <p className="font-bold text-red-500 dark:text-red-400 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
+                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs dark:text-slate-600">✕</button>
                     </div>
                   </div>
                 ))}

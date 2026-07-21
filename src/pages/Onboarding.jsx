@@ -65,37 +65,37 @@ export default function Onboarding({ userId, onComplete }) {
   const sugeridas = CATEGORIAS_SUGERIDAS[data.tipo_negocio] || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
           <span className="text-4xl">📈</span>
-          <h1 className="text-2xl font-bold text-slate-800 mt-2">Configuremos tu negocio</h1>
-          <p className="text-slate-500 text-sm mt-1">Paso {paso} de 5</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-2">Configuremos tu negocio</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Paso {paso} de 5</p>
         </div>
 
         {/* Progress */}
         <div className="flex gap-1 mb-6">
           {[1,2,3,4,5].map(n => (
-            <div key={n} className={`flex-1 h-1.5 rounded-full transition-colors ${n <= paso ? "bg-blue-600" : "bg-slate-200"}`} />
+            <div key={n} className={`flex-1 h-1.5 rounded-full transition-colors ${n <= paso ? "bg-blue-600" : "bg-slate-200 dark:bg-slate-700"}`} />
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
 
           {/* Paso 1: Info básica */}
           {paso === 1 && (
             <div className="space-y-4">
-              <h2 className="font-bold text-slate-800 text-lg">¿Cómo se llama tu negocio?</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg">¿Cómo se llama tu negocio?</h2>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre del negocio *</label>
-                <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nombre del negocio *</label>
+                <input className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ej: Detalles con Amor" value={data.nombre_negocio}
                   onChange={e => set("nombre_negocio", e.target.value)} />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tu nombre *</label>
-                <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Tu nombre *</label>
+                <input className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Ej: María González" value={data.nombre_propietario}
                   onChange={e => set("nombre_propietario", e.target.value)} />
               </div>
@@ -105,13 +105,13 @@ export default function Onboarding({ userId, onComplete }) {
           {/* Paso 2: Moneda */}
           {paso === 2 && (
             <div className="space-y-4">
-              <h2 className="font-bold text-slate-800 text-lg">¿Con qué moneda trabajas?</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg">¿Con qué moneda trabajas?</h2>
               <div className="grid grid-cols-2 gap-3">
                 {[{ id: "CRC", label: "₡ Colones", sub: "Costa Rica" }, { id: "USD", label: "$ Dólares", sub: "Internacional" }].map(m => (
                   <button key={m.id} onClick={() => set("moneda", m.id)}
-                    className={`border-2 rounded-xl p-4 text-left transition-all ${data.moneda === m.id ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-slate-300"}`}>
-                    <p className="font-bold text-slate-800">{m.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{m.sub}</p>
+                    className={`border-2 rounded-xl p-4 text-left transition-all ${data.moneda === m.id ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40" : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"}`}>
+                    <p className="font-bold text-slate-800 dark:text-slate-100">{m.label}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{m.sub}</p>
                   </button>
                 ))}
               </div>
@@ -121,7 +121,7 @@ export default function Onboarding({ userId, onComplete }) {
           {/* Paso 3: Tipo de negocio */}
           {paso === 3 && (
             <div className="space-y-4">
-              <h2 className="font-bold text-slate-800 text-lg">¿Qué tipo de negocio es?</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg">¿Qué tipo de negocio es?</h2>
               <div className="space-y-2">
                 {[
                   { id: "productos", label: "Vendo productos físicos", icon: "🛍️" },
@@ -130,9 +130,9 @@ export default function Onboarding({ userId, onComplete }) {
                   { id: "pedidos", label: "Trabajo por pedidos/encargos", icon: "📋" },
                 ].map(t => (
                   <button key={t.id} onClick={() => set("tipo_negocio", t.id)}
-                    className={`w-full flex items-center gap-3 border-2 rounded-xl px-4 py-3 text-left transition-all ${data.tipo_negocio === t.id ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-slate-300"}`}>
+                    className={`w-full flex items-center gap-3 border-2 rounded-xl px-4 py-3 text-left transition-all ${data.tipo_negocio === t.id ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40" : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"}`}>
                     <span className="text-xl">{t.icon}</span>
-                    <span className="font-medium text-slate-700 text-sm">{t.label}</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200 text-sm">{t.label}</span>
                   </button>
                 ))}
               </div>
@@ -142,20 +142,20 @@ export default function Onboarding({ userId, onComplete }) {
           {/* Paso 4: Categorías */}
           {paso === 4 && (
             <div className="space-y-4">
-              <h2 className="font-bold text-slate-800 text-lg">Categorías de gastos</h2>
-              <p className="text-sm text-slate-500">Selecciona las que apliquen. Puedes editarlas después.</p>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Categorías de gastos</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Selecciona las que apliquen. Puedes editarlas después.</p>
               <div className="flex flex-wrap gap-2">
                 {sugeridas.map(cat => (
                   <button key={cat} onClick={() => toggleCategoria(cat)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
                       data.categorias.includes(cat)
                         ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-slate-600 border-slate-300 hover:border-blue-400"
+                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-blue-400"
                     }`}>{cat}</button>
                 ))}
               </div>
               <div className="flex gap-2 mt-2">
-                <input className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <input className="flex-1 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Agregar categoría..." value={data.categoria_nueva}
                   onChange={e => set("categoria_nueva", e.target.value)}
                   onKeyDown={e => e.key === "Enter" && agregarCategoria()} />
@@ -168,17 +168,17 @@ export default function Onboarding({ userId, onComplete }) {
           {/* Paso 5: Inventario */}
           {paso === 5 && (
             <div className="space-y-4">
-              <h2 className="font-bold text-slate-800 text-lg">¿Manejás inventario de materiales?</h2>
-              <p className="text-sm text-slate-500">Por ejemplo, materias primas para elaborar tus productos.</p>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-lg">¿Manejás inventario de materiales?</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Por ejemplo, materias primas para elaborar tus productos.</p>
               <div className="space-y-3">
                 {[
                   { val: true, label: "Sí, manejo materiales e insumos", icon: "📦" },
                   { val: false, label: "No, no necesito inventario", icon: "🚫" },
                 ].map(opt => (
                   <button key={String(opt.val)} onClick={() => set("maneja_inventario", opt.val)}
-                    className={`w-full flex items-center gap-3 border-2 rounded-xl px-4 py-3 text-left transition-all ${data.maneja_inventario === opt.val ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-slate-300"}`}>
+                    className={`w-full flex items-center gap-3 border-2 rounded-xl px-4 py-3 text-left transition-all ${data.maneja_inventario === opt.val ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40" : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"}`}>
                     <span className="text-xl">{opt.icon}</span>
-                    <span className="font-medium text-slate-700 text-sm">{opt.label}</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200 text-sm">{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -189,7 +189,7 @@ export default function Onboarding({ userId, onComplete }) {
           <div className="flex gap-3 mt-6">
             {paso > 1 && (
               <button onClick={() => setPaso(p => p - 1)}
-                className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-3 text-sm hover:bg-slate-50">
+                className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
                 Atrás
               </button>
             )}

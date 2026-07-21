@@ -342,30 +342,29 @@ export default function Reportes() {
   // ── Render: selección de reportes ───────────────────────────────────
   return (
     <div style={{ padding: '16px', maxWidth: '480px', margin: '0 auto' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px', color: '#1a1a2e' }}>
+      <h2 className="text-[#1a1a2e] dark:text-slate-100" style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px' }}>
         Reportes
       </h2>
-      <p style={{ fontSize: '13px', color: '#666', marginBottom: '24px' }}>
+      <p className="text-[#666] dark:text-slate-400" style={{ fontSize: '13px', marginBottom: '24px' }}>
         Mirá tus reportes en pantalla, imprimilos o descargalos en PDF.
       </p>
 
       {error && (
-        <div style={{
-          background: '#fff0f0', border: '1px solid #ffcccc',
+        <div className="bg-[#fff0f0] dark:bg-red-950/40 border border-[#ffcccc] dark:border-red-800 text-[#cc0000] dark:text-red-400" style={{
           borderRadius: '8px', padding: '12px', marginBottom: '16px',
-          fontSize: '13px', color: '#cc0000',
+          fontSize: '13px',
         }}>
           {error}
         </div>
       )}
 
       {/* ── Tarjeta 1: Estado de Resultados ── */}
-      <div style={estilos.tarjeta}>
+      <div style={estilos.tarjeta} className="bg-white dark:bg-slate-800 border border-[#f0f0f0] dark:border-slate-700">
         <div style={estilos.tarjetaEncabezado}>
           <span style={estilos.icono}>📊</span>
           <div>
-            <div style={estilos.titulo}>Estado de Resultados</div>
-            <div style={estilos.subtitulo}>Ingresos, gastos y utilidad del mes</div>
+            <div style={estilos.titulo} className="text-[#1a1a2e] dark:text-slate-100">Estado de Resultados</div>
+            <div style={estilos.subtitulo} className="text-[#888] dark:text-slate-400">Ingresos, gastos y utilidad del mes</div>
           </div>
         </div>
 
@@ -374,6 +373,7 @@ export default function Reportes() {
             value={mes}
             onChange={(e) => setMes(Number(e.target.value))}
             style={estilos.select}
+            className="border border-[#ddd] dark:border-slate-600 bg-[#fafafa] dark:bg-slate-800 text-[#333] dark:text-slate-100"
           >
             {MESES.map((m, i) => (
               <option key={i} value={i}>{m}</option>
@@ -383,6 +383,7 @@ export default function Reportes() {
             value={anio}
             onChange={(e) => setAnio(Number(e.target.value))}
             style={{ ...estilos.select, maxWidth: '90px' }}
+            className="border border-[#ddd] dark:border-slate-600 bg-[#fafafa] dark:bg-slate-800 text-[#333] dark:text-slate-100"
           >
             {aniosDisponibles.map((a) => (
               <option key={a} value={a}>{a}</option>
@@ -400,21 +401,22 @@ export default function Reportes() {
       </div>
 
       {/* ── Tarjeta 2: Reporte de Pedidos ── */}
-      <div style={estilos.tarjeta}>
+      <div style={estilos.tarjeta} className="bg-white dark:bg-slate-800 border border-[#f0f0f0] dark:border-slate-700">
         <div style={estilos.tarjetaEncabezado}>
           <span style={estilos.icono}>📦</span>
           <div>
-            <div style={estilos.titulo}>Reporte de Pedidos</div>
-            <div style={estilos.subtitulo}>Todos los pedidos con costo y ganancia</div>
+            <div style={estilos.titulo} className="text-[#1a1a2e] dark:text-slate-100">Reporte de Pedidos</div>
+            <div style={estilos.subtitulo} className="text-[#888] dark:text-slate-400">Todos los pedidos con costo y ganancia</div>
           </div>
         </div>
 
         <div style={{ marginBottom: '12px' }}>
-          <label style={estilos.label}>Filtrar por estado</label>
+          <label style={estilos.label} className="text-[#555] dark:text-slate-300">Filtrar por estado</label>
           <select
             value={filtroPedidos}
             onChange={(e) => setFiltroPedidos(e.target.value)}
             style={estilos.select}
+            className="border border-[#ddd] dark:border-slate-600 bg-[#fafafa] dark:bg-slate-800 text-[#333] dark:text-slate-100"
           >
             <option value="todos">Todos</option>
             <option value="pendiente">Pendiente</option>
@@ -434,12 +436,12 @@ export default function Reportes() {
       </div>
 
       {/* ── Tarjeta 3: Inventario ── */}
-      <div style={estilos.tarjeta}>
+      <div style={estilos.tarjeta} className="bg-white dark:bg-slate-800 border border-[#f0f0f0] dark:border-slate-700">
         <div style={estilos.tarjetaEncabezado}>
           <span style={estilos.icono}>🗂️</span>
           <div>
-            <div style={estilos.titulo}>Reporte de Inventario</div>
-            <div style={estilos.subtitulo}>Stock actual, costos y alertas de mínimos</div>
+            <div style={estilos.titulo} className="text-[#1a1a2e] dark:text-slate-100">Reporte de Inventario</div>
+            <div style={estilos.subtitulo} className="text-[#888] dark:text-slate-400">Stock actual, costos y alertas de mínimos</div>
           </div>
         </div>
 
@@ -453,17 +455,17 @@ export default function Reportes() {
       </div>
 
       {/* ── Tarjeta 4: Reporte Tributario Trimestral ── */}
-      <div style={estilos.tarjeta}>
+      <div style={estilos.tarjeta} className="bg-white dark:bg-slate-800 border border-[#f0f0f0] dark:border-slate-700">
         <div style={estilos.tarjetaEncabezado}>
           <span style={estilos.icono}>🧾</span>
           <div>
-            <div style={estilos.titulo}>Reporte Tributario Trimestral</div>
-            <div style={estilos.subtitulo}>Compras de material · Régimen Simplificado</div>
+            <div style={estilos.titulo} className="text-[#1a1a2e] dark:text-slate-100">Reporte Tributario Trimestral</div>
+            <div style={estilos.subtitulo} className="text-[#888] dark:text-slate-400">Compras de material · Régimen Simplificado</div>
           </div>
         </div>
 
         <div style={{ marginBottom: '12px' }}>
-          <label style={estilos.label}>Trimestre</label>
+          <label style={estilos.label} className="text-[#555] dark:text-slate-300">Trimestre</label>
           <select
             value={`${trimestreSel.anio}-${trimestreSel.trimestre}`}
             onChange={(e) => {
@@ -471,6 +473,7 @@ export default function Reportes() {
               setTrimestreSel({ anio: a, trimestre: t });
             }}
             style={estilos.select}
+            className="border border-[#ddd] dark:border-slate-600 bg-[#fafafa] dark:bg-slate-800 text-[#333] dark:text-slate-100"
           >
             {trimestresDisponibles.map((t) => (
               <option key={`${t.anio}-${t.trimestre}`} value={`${t.anio}-${t.trimestre}`}>
@@ -489,7 +492,7 @@ export default function Reportes() {
         </button>
       </div>
 
-      <p style={{ fontSize: '11px', color: '#aaa', textAlign: 'center', marginTop: '16px' }}>
+      <p className="text-[#aaa] dark:text-slate-500" style={{ fontSize: '11px', textAlign: 'center', marginTop: '16px' }}>
         Desde la vista previa podés imprimir o descargar el PDF.
       </p>
     </div>
@@ -499,12 +502,10 @@ export default function Reportes() {
 // ── Estilos ───────────────────────────────────────────────────────
 const estilos = {
   tarjeta: {
-    background: '#fff',
     borderRadius: '12px',
     padding: '16px',
     marginBottom: '14px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-    border: '1px solid #f0f0f0',
   },
   tarjetaEncabezado: {
     display: 'flex',
@@ -520,17 +521,14 @@ const estilos = {
   titulo: {
     fontSize: '15px',
     fontWeight: '700',
-    color: '#1a1a2e',
     marginBottom: '2px',
   },
   subtitulo: {
     fontSize: '12px',
-    color: '#888',
   },
   label: {
     display: 'block',
     fontSize: '12px',
-    color: '#555',
     marginBottom: '4px',
     fontWeight: '500',
   },
@@ -538,10 +536,7 @@ const estilos = {
     width: '100%',
     padding: '8px 10px',
     borderRadius: '8px',
-    border: '1px solid #ddd',
     fontSize: '14px',
-    background: '#fafafa',
-    color: '#333',
     outline: 'none',
   },
   boton: (activo) => ({

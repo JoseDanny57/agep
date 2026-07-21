@@ -7,9 +7,9 @@ function fmt(monto, moneda) {
 }
 
 const TIPOS = {
-  caja:        { label: "Caja",          emoji: "💵", color: "border-green-500 text-green-600 bg-green-50",   bg: "#f0fdf4" },
-  inversion:   { label: "Inversión",     emoji: "📈", color: "border-blue-500 text-blue-600 bg-blue-50",      bg: "#eff6ff" },
-  activo_fijo: { label: "Activos Fijos", emoji: "🏢", color: "border-purple-500 text-purple-600 bg-purple-50", bg: "#f5f3ff" },
+  caja:        { label: "Caja",          emoji: "💵", color: "border-green-500 text-green-600 bg-green-50 dark:text-green-300 dark:bg-green-950/40",   bg: "#f0fdf4" },
+  inversion:   { label: "Inversión",     emoji: "📈", color: "border-blue-500 text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40",      bg: "#eff6ff" },
+  activo_fijo: { label: "Activos Fijos", emoji: "🏢", color: "border-purple-500 text-purple-600 bg-purple-50 dark:text-purple-300 dark:bg-purple-950/40", bg: "#f5f3ff" },
 };
 
 export default function CapitalInicial({ perfil, userId }) {
@@ -81,8 +81,8 @@ export default function CapitalInicial({ perfil, userId }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Capital Inicial</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Total: <span className="font-semibold" style={{ color }}>{fmt(total, moneda)}</span></p>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Capital Inicial</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Total: <span className="font-semibold" style={{ color }}>{fmt(total, moneda)}</span></p>
         </div>
         <button onClick={abrirNuevo}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
@@ -92,16 +92,16 @@ export default function CapitalInicial({ perfil, userId }) {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
-          <h3 className="font-bold text-slate-800">{editando ? "Editar rubro" : "Nuevo rubro"}</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 space-y-4">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100">{editando ? "Editar rubro" : "Nuevo rubro"}</h3>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-2">Tipo</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Tipo</label>
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(TIPOS).map(([key, cfg]) => (
                 <button key={key}
                   onClick={() => setForm(f => ({ ...f, tipo: key }))}
-                  className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 text-slate-500"}`}>
+                  className={`py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${form.tipo === key ? cfg.color : "border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400"}`}>
                   {cfg.emoji} {cfg.label}
                 </button>
               ))}
@@ -109,8 +109,8 @@ export default function CapitalInicial({ perfil, userId }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Descripción *</label>
-            <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Descripción *</label>
+            <input className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder={
                 form.tipo === "inversion"   ? "Ej: Aporte de socio" :
                 form.tipo === "activo_fijo" ? "Ej: Máquina de coser" :
@@ -121,21 +121,21 @@ export default function CapitalInicial({ perfil, userId }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Monto ({moneda}) *</label>
-              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monto ({moneda}) *</label>
+              <input type="number" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0" value={form.monto}
                 onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Fecha</label>
-              <input type="date" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha</label>
+              <input type="date" className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} />
             </div>
           </div>
 
           <div className="flex gap-3">
             <button onClick={() => setShowForm(false)}
-              className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50">
+              className="flex-1 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
               Cancelar
             </button>
             <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto}
@@ -148,12 +148,12 @@ export default function CapitalInicial({ perfil, userId }) {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-slate-400">Cargando...</div>
+        <div className="text-center py-12 text-slate-400 dark:text-slate-500">Cargando...</div>
       ) : rubros.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">🏦</p>
-          <p className="font-semibold text-slate-600">Aún no registraste tu capital inicial</p>
-          <p className="text-sm text-slate-400 mt-1">Agrega el primer rubro: caja, inversión o activos fijos con los que arrancó tu negocio.</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">Aún no registraste tu capital inicial</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Agrega el primer rubro: caja, inversión o activos fijos con los que arrancó tu negocio.</p>
         </div>
       ) : (
         <>
@@ -163,24 +163,24 @@ export default function CapitalInicial({ perfil, userId }) {
             return (
               <div key={tipo}>
                 <div className="flex justify-between items-center mb-2 px-1">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{cfg.emoji} {cfg.label}</p>
-                  <p className="text-xs font-bold text-slate-600">{fmt(subtotal, moneda)}</p>
+                  <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{cfg.emoji} {cfg.label}</p>
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{fmt(subtotal, moneda)}</p>
                 </div>
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                   {items.map((item, idx) => (
-                    <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
+                    <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                         style={{ backgroundColor: cfg.bg }}>
                         {cfg.emoji}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                        <p className="text-xs text-slate-400">{new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
+                        <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{item.descripcion}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-slate-800 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
-                        <button onClick={() => abrirEditar(item)} className="text-slate-400 hover:text-blue-500 text-xs px-2 py-1 rounded-lg hover:bg-blue-50">✏️</button>
-                        <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                        <p className="font-bold text-slate-800 dark:text-slate-100 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
+                        <button onClick={() => abrirEditar(item)} className="text-slate-400 dark:text-slate-500 hover:text-blue-500 text-xs px-2 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40">✏️</button>
+                        <button onClick={() => eliminar(item.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-xs">✕</button>
                       </div>
                     </div>
                   ))}
@@ -189,8 +189,8 @@ export default function CapitalInicial({ perfil, userId }) {
             );
           })}
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex justify-between items-center">
-            <span className="font-semibold text-slate-700 text-sm">Total general</span>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 flex justify-between items-center">
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Total general</span>
             <span className="font-bold text-lg" style={{ color }}>{fmt(total, moneda)}</span>
           </div>
         </>
