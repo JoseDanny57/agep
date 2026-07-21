@@ -11,6 +11,7 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
   const [form, setForm] = useState({
     nombre_negocio: perfil?.nombre_negocio || "",
     nombre_propietario: perfil?.nombre_propietario || "",
+    actividad_economica: perfil?.actividad_economica || "",
     moneda: perfil?.moneda || "CRC",
     tipo_negocio: perfil?.tipo_negocio || "",
     color_principal: perfil?.color_principal || "#2E75B6",
@@ -201,6 +202,12 @@ export default function Configuracion({ perfil, setPerfil, userId }) {
           <label className="block text-xs font-semibold text-slate-600 mb-1.5">Nombre del propietario</label>
           <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.nombre_propietario} onChange={e => setForm(f => ({ ...f, nombre_propietario: e.target.value }))} />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1.5">Actividad económica</label>
+          <input className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ej: Confección de ropa"
+            value={form.actividad_economica} onChange={e => setForm(f => ({ ...f, actividad_economica: e.target.value }))} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">

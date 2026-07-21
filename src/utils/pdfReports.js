@@ -356,3 +356,139 @@ export async function generarReporteInventario({ perfil, materiales = [] }) {
   dibujarPie(doc);
   doc.save('Reporte_Inventario.pdf');
 }
+
+// ─────────────────────────────────────────────
+// 4. REPORTE TRIBUTARIO TRIMESTRAL — RÉGIMEN SIMPLIFICADO
+// ─────────────────────────────────────────────
+export async function generarReporteTributario(datos) {
+  const {
+    perfil,
+    trimestreLabel,
+    fechaEmision,
+    totalCompras = 0,
+    cantidadCompras = 0,
+    proveedoresDistintos = 0,
+    compraPromedio = 0,
+    totalesPorCategoria = [],
+    totalesPorTarifa = [],
+    totalesPorProveedor = [],
+    conFoto = 0,
+    sinFoto = 0,
+    detalle = [],
+  } = datos;
+
+  const moneda = perfil?.moneda || 'CRC';
+  const color = hexToRgb(perfil?.color_principal);
+  const doc = new jsPDF();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  let y = await dibujarEncabezado(doc, perfil, 'Reporte Tributario Trimestral', trimestreLabel);
+
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(80);
+  doc.text(`Actividad económica: ${perfil?.actividad_economica || '—'}`, 14, y);
+  doc.text(`Fecha de emisión: ${fechaEmision}`, 14, y + 5);
+  doc.setTextColor(0);
+  y += 12;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Resumen del trimestre', '']],
+    body: [
+      ['Compras del trimestre', formatearMonto(totalCompras, moneda)],
+      ['Cantidad de compras', String(cantidadCompras)],
+      ['Proveedores diferentes', String(proveedoresDistintos)],
+      ['Compra promedio', formatearMonto(compraPromedio, moneda)],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: color, fontStyle: 'bold', fontSize: 10 },
+    styles: { fontSize: 9.5 },
+    columnStyles: { 1: { halign: 'right' } },
+  });
+  y = doc.lastAutoTable.finalY + 10;
+
+  const seccion = (titulo, head, body) => {
+    if (y > pageHeight - 50) { doc.addPage(); y = 20; }
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(80);
+    doc.text(titulo, 14, y);
+    y += 3;
+    doc.autoTable({
+      startY: y,
+      head: [head],
+      body,
+      theme: 'striped',
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: color, fontSize: 9 },
+      columnStyles: { 1: { halign: 'right' } },
+    });
+    y = doc.lastAutoTable.finalY + 10;
+  };
+
+  seccion(
+    'Totales por categoría',
+    ['Categoría', 'Monto'],
+    totalesPorCategoria.length
+      ? totalesPorCategoria.map((c) => [c.nombre, formatearMonto(c.monto, moneda)])
+      : [['Sin compras registradas en este trimestre', '']]
+  );
+
+  seccion(
+    'Totales por tarifa de IVA',
+    ['Tarifa', 'Monto'],
+    totalesPorTarifa.length
+      ? totalesPorTarifa.map((t) => [`${t.tarifa}%`, formatearMonto(t.monto, moneda)])
+      : [['Sin compras registradas en este trimestre', '']]
+  );
+
+  seccion(
+    'Totales por proveedor',
+    ['Proveedor', 'Monto'],
+    totalesPorProveedor.length
+      ? totalesPorProveedor.map((p) => [p.proveedor, formatearMonto(p.monto, moneda)])
+      : [['Sin compras registradas en este trimestre', '']]
+  );
+
+  seccion(
+    'Respaldo documental',
+    ['Concepto', 'Cantidad'],
+    [
+      ['Compras registradas', String(cantidadCompras)],
+      ['Compras con fotografía del comprobante', String(conFoto)],
+      ['Compras sin respaldo digital', String(sinFoto)],
+    ]
+  );
+
+  // ── Detalle (segunda sección) ──
+  doc.addPage();
+  y = 20;
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(40);
+  doc.text('Detalle de Compras', 14, y);
+  y += 5;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Fecha', 'Proveedor', 'N.° de comprobante', 'Categoría', 'Tarifa IVA', 'Monto']],
+    body: detalle.length
+      ? detalle.map((d) => [
+          d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-CR') : '—',
+          d.proveedor || '—',
+          d.numero_comprobante || '—',
+          d.categoria || '—',
+          d.tarifa_iva != null ? `${d.tarifa_iva}%` : '—',
+          formatearMonto(d.monto, moneda),
+        ])
+      : [['—', 'Sin compras registradas en este trimestre', '—', '—', '—', '—']],
+    theme: 'grid',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: color, fontStyle: 'bold', fontSize: 8.5 },
+    columnStyles: { 5: { halign: 'right' } },
+  });
+
+  dibujarPie(doc);
+  doc.save(`Reporte_Tributario_${trimestreLabel.replace(/\s+/g, '_')}.pdf`);
+}
