@@ -375,7 +375,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
   const costo = costoTotal(itemsMaterial);
   const gananciaEstimada = Number(form.precio_venta) - costo;
 
-  if (loading) return <div className="text-center py-12 text-slate-400">Cargando...</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400 dark:text-slate-500">Cargando...</div>;
 
   // Vista detalle de pedido
   if (pedidoAbierto) {
@@ -453,10 +453,10 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
             <div className="relative bg-white dark:bg-slate-800 w-full sm:w-96 sm:rounded-2xl rounded-t-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto"
               style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
               <h3 className="font-bold text-slate-800 dark:text-slate-100">Cerrar saldo a favor</h3>
-              <p className="text-sm text-slate-500">
-                Saldo a favor disponible: <span className="font-bold text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Saldo a favor disponible: <span className="font-bold text-amber-600 dark:text-amber-400">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Este dinero ya se registró en Ingresos cuando se recibió el pago. Esta acción solo cierra el saldo dentro de este pedido.
               </p>
               <div>
@@ -484,12 +484,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         <div className="flex items-center gap-3">
           <button onClick={() => setPedidoAbierto(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-xl">←</button>
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex-1">{p.cliente}</h1>
-          <button onClick={() => eliminar(p.id)} className="text-slate-300 hover:text-red-400 text-sm">🗑️</button>
+          <button onClick={() => eliminar(p.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-sm">🗑️</button>
         </div>
 
         {/* Estado */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
-          <p className="text-xs font-semibold text-slate-500 mb-3">ESTADO DEL PEDIDO</p>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">ESTADO DEL PEDIDO</p>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(ESTADOS).map(([key, cfg]) => (
               <button key={key} onClick={() => cambiarEstado(p.id, key)}
@@ -504,57 +504,57 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-2">
           {p.descripcion && <p className="text-sm text-slate-600 dark:text-slate-300">{p.descripcion}</p>}
           {p.fecha_entrega && (
-            <p className="text-xs text-slate-400">📅 Entrega: {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">📅 Entrega: {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>
           )}
         </div>
 
         {/* Financiero */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-3">
-          <p className="text-xs font-semibold text-slate-500">RESUMEN FINANCIERO</p>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">RESUMEN FINANCIERO</p>
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Precio de venta</span>
+            <span className="text-slate-500 dark:text-slate-400">Precio de venta</span>
             <span className="font-bold text-slate-800 dark:text-slate-100">{p.precio_venta ? fmt(p.precio_venta, moneda) : "—"}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Costo de materiales</span>
-            <span className="font-bold text-red-500">{fmt(costoP, moneda)}</span>
+            <span className="text-slate-500 dark:text-slate-400">Costo de materiales</span>
+            <span className="font-bold text-red-500 dark:text-red-400">{fmt(costoP, moneda)}</span>
           </div>
-          <div className="border-t border-slate-100 pt-2 flex justify-between text-sm">
+          <div className="border-t border-slate-100 dark:border-slate-700 pt-2 flex justify-between text-sm">
             <span className="font-semibold text-slate-700 dark:text-slate-200">Ganancia estimada</span>
-            <span className={`font-bold text-lg ${ganancia >= 0 ? "text-green-600" : "text-red-500"}`}>{fmt(ganancia, moneda)}</span>
+            <span className={`font-bold text-lg ${ganancia >= 0 ? "text-green-600 dark:text-green-300" : "text-red-500 dark:text-red-400"}`}>{fmt(ganancia, moneda)}</span>
           </div>
         </div>
 
         {/* Cuentas por cobrar */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 space-y-3">
-          <p className="text-xs font-semibold text-slate-500">CUENTAS POR COBRAR</p>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">CUENTAS POR COBRAR</p>
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Total pagado por el cliente</span>
+            <span className="text-slate-500 dark:text-slate-400">Total pagado por el cliente</span>
             <span className="font-bold text-slate-800 dark:text-slate-100">{fmt(totalPagadoCliente, moneda)}</span>
           </div>
-          <div className="border-t border-slate-100 pt-2 flex justify-between text-sm items-center">
+          <div className="border-t border-slate-100 dark:border-slate-700 pt-2 flex justify-between text-sm items-center">
             {saldoPendiente > 0 && (
               <>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">Saldo pendiente</span>
-                <span className="font-bold text-lg text-red-500">{fmt(saldoPendiente, moneda)}</span>
+                <span className="font-bold text-lg text-red-500 dark:text-red-400">{fmt(saldoPendiente, moneda)}</span>
               </>
             )}
             {saldoPendiente < 0 && (
               <>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">Saldo a favor del cliente</span>
-                <span className="font-bold text-lg text-amber-600">{fmtSaldoFavor(saldoFavor, moneda)}</span>
+                <span className="font-bold text-lg text-amber-600 dark:text-amber-400">{fmtSaldoFavor(saldoFavor, moneda)}</span>
               </>
             )}
             {saldoPendiente === 0 && (
               <>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">Estado de pago</span>
-                <span className="font-bold text-lg text-green-600">Pagado completo</span>
+                <span className="font-bold text-lg text-green-600 dark:text-green-300">Pagado completo</span>
               </>
             )}
           </div>
           {saldoPendiente < 0 && (
             <button onClick={() => abrirTraslado(saldoFavor)}
-              className="w-full border-2 border-amber-500 text-amber-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-amber-50">
+              className="w-full border-2 border-amber-500 dark:border-amber-600 text-amber-600 dark:text-amber-400 font-semibold rounded-xl py-2.5 text-sm hover:bg-amber-50 dark:hover:bg-amber-950/40">
               Cerrar saldo a favor del pedido
             </button>
           )}
@@ -563,17 +563,17 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         {/* Pagos */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <p className="text-xs font-semibold text-slate-500">PAGOS</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">PAGOS</p>
             <button onClick={abrirNuevoPago} className="text-xs font-medium hover:opacity-80" style={{ color }}>+ Registrar pago</button>
           </div>
           {pagos.length === 0 ? (
-            <p className="text-sm text-slate-400 px-4 pb-4">Sin pagos registrados.</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500 px-4 pb-4">Sin pagos registrados.</p>
           ) : (
             pagos.map((pg, idx) => {
               const esAjuste = pg.metodo_pago === "ajuste_ingreso";
               return (
                 <div key={pg.id} className={`flex items-center justify-between px-4 py-3 ${idx < pagos.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
-                  <div className={esAjuste ? "italic text-slate-400" : ""}>
+                  <div className={esAjuste ? "italic text-slate-400 dark:text-slate-500" : ""}>
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium">{new Date(pg.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
                       {esAjuste ? (
@@ -582,16 +582,16 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                         <span className="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full px-2 py-0.5 text-[10px]">{METODOS_PAGO[pg.metodo_pago] || pg.metodo_pago}</span>
                       )}
                     </div>
-                    {pg.nota && <p className="text-xs text-slate-400 mt-0.5">{pg.nota}</p>}
+                    {pg.nota && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{pg.nota}</p>}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <p className={`text-sm font-bold whitespace-nowrap ${esAjuste ? "italic text-slate-400" : Number(pg.monto) < 0 ? "text-red-500" : "text-green-600"}`}>
+                    <p className={`text-sm font-bold whitespace-nowrap ${esAjuste ? "italic text-slate-400 dark:text-slate-500" : Number(pg.monto) < 0 ? "text-red-500 dark:text-red-400" : "text-green-600 dark:text-green-300"}`}>
                       {fmt(pg.monto, moneda)}
                     </p>
                     {!esAjuste && (
                       <>
-                        <button onClick={() => abrirEditarPago(pg)} className="text-slate-300 hover:text-blue-400 text-xs">✏️</button>
-                        <button onClick={() => eliminarPago(pg.id)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                        <button onClick={() => abrirEditarPago(pg)} className="text-slate-300 dark:text-slate-600 hover:text-blue-400 text-xs">✏️</button>
+                        <button onClick={() => eliminarPago(pg.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-xs">✕</button>
                       </>
                     )}
                   </div>
@@ -604,12 +604,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         {/* Materiales */}
         {(p.pedido_materiales || []).length > 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-            <p className="text-xs font-semibold text-slate-500 px-4 pt-4 pb-2">MATERIALES</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 px-4 pt-4 pb-2">MATERIALES</p>
             {p.pedido_materiales.map((m, idx) => (
               <div key={m.id} className={`flex items-center justify-between px-4 py-3 ${idx < p.pedido_materiales.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                 <div>
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{m.nombre_material}</p>
-                  <p className="text-xs text-slate-400">{m.cantidad} × {fmt(m.costo_unitario, moneda)}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{m.cantidad} × {fmt(m.costo_unitario, moneda)}</p>
                 </div>
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{fmt(m.cantidad * m.costo_unitario, moneda)}</p>
               </div>
@@ -625,7 +625,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Pedidos</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{pedidos.length} pedido{pedidos.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{pedidos.length} pedido{pedidos.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={() => setShowForm(true)}
           className="text-white font-bold rounded-xl px-4 py-2.5 text-sm shadow-sm hover:opacity-90"
@@ -655,7 +655,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                 <option value="">Seleccionar artículo...</option>
                 {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
               </select>
-              <p className="text-[10px] text-slate-400 mt-1">Autocompleta descripción, precio y materiales</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Autocompleta descripción, precio y materiales</p>
             </div>
           )}
 
@@ -725,7 +725,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                       onChange={e => actualizarMaterial(idx, "costo_unitario", e.target.value)} />
                   </div>
                 </div>
-                <button onClick={() => quitarMaterial(idx)} className="text-slate-300 hover:text-red-400 mt-2">✕</button>
+                <button onClick={() => quitarMaterial(idx)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 mt-2">✕</button>
               </div>
             ))}
           </div>
@@ -733,12 +733,12 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
           {/* Resumen financiero en tiempo real */}
           {(form.precio_venta || itemsMaterial.length > 0) && (
             <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 space-y-1">
-              {costo > 0 && <div className="flex justify-between text-xs text-slate-500"><span>Costo materiales</span><span className="font-medium">{fmt(costo, moneda)}</span></div>}
-              {form.precio_venta && <div className="flex justify-between text-xs text-slate-500"><span>Precio de venta</span><span className="font-medium">{fmt(Number(form.precio_venta), moneda)}</span></div>}
+              {costo > 0 && <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400"><span>Costo materiales</span><span className="font-medium">{fmt(costo, moneda)}</span></div>}
+              {form.precio_venta && <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400"><span>Precio de venta</span><span className="font-medium">{fmt(Number(form.precio_venta), moneda)}</span></div>}
               {form.precio_venta && costo > 0 && (
                 <div className="flex justify-between text-sm font-bold border-t border-slate-200 dark:border-slate-700 pt-1 mt-1">
                   <span>Ganancia estimada</span>
-                  <span className={gananciaEstimada >= 0 ? "text-green-600" : "text-red-500"}>{fmt(gananciaEstimada, moneda)}</span>
+                  <span className={gananciaEstimada >= 0 ? "text-green-600 dark:text-green-300" : "text-red-500 dark:text-red-400"}>{fmt(gananciaEstimada, moneda)}</span>
                 </div>
               )}
             </div>
@@ -763,7 +763,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
         <div className="text-center py-12">
           <p className="text-4xl mb-3">📋</p>
           <p className="font-semibold text-slate-600 dark:text-slate-300">Sin pedidos registrados</p>
-          <p className="text-sm text-slate-400 mt-1">Creá tu primer pedido.</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Creá tu primer pedido.</p>
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -780,18 +780,18 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
                     <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{p.cliente}</p>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${est.color}`}>{est.emoji} {est.label}</span>
                   </div>
-                  {p.descripcion && <p className="text-xs text-slate-400 truncate">{p.descripcion}</p>}
-                  {p.fecha_entrega && <p className="text-xs text-slate-400">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
+                  {p.descripcion && <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{p.descripcion}</p>}
+                  {p.fecha_entrega && <p className="text-xs text-slate-400 dark:text-slate-500">📅 {new Date(p.fecha_entrega + "T12:00:00").toLocaleDateString("es-CR")}</p>}
                 </div>
                 <div className="text-right flex-shrink-0">
                   {p.precio_venta && <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{fmt(p.precio_venta, moneda)}</p>}
                   {p.precio_venta && costoP > 0 && (
-                    <p className={`text-xs font-medium ${ganancia >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    <p className={`text-xs font-medium ${ganancia >= 0 ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
                       {ganancia >= 0 ? "+" : ""}{fmt(ganancia, moneda)}
                     </p>
                   )}
                 </div>
-                <span className="text-slate-300 text-sm">›</span>
+                <span className="text-slate-300 dark:text-slate-600 text-sm">›</span>
               </div>
             );
           })}

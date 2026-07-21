@@ -374,7 +374,7 @@ export default function Gastos({ perfil, userId }) {
               <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                 placeholder="0" value={form.monto}
                 onChange={e => setForm(f => ({ ...f, monto: e.target.value }))} />
-              <p className="text-[10px] text-slate-400 mt-1">El monto debe incluir el IVA</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">El monto debe incluir el IVA</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Fecha</label>
@@ -497,33 +497,33 @@ export default function Gastos({ perfil, userId }) {
           return (
             <div key={mes}>
               <div className="flex justify-between items-center mb-2 px-1">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider capitalize">{labelMes}</p>
-                <p className="text-xs font-bold text-red-500">{fmt(totalMes, moneda)}</p>
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider capitalize">{labelMes}</p>
+                <p className="text-xs font-bold text-red-500 dark:text-red-400">{fmt(totalMes, moneda)}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50" : ""}`}>
+                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                       style={{ backgroundColor: tipoConfig[item.tipo]?.bg || "#fef2f2" }}>
                       {tipoConfig[item.tipo]?.emoji || "💸"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-800 text-sm truncate">{item.descripcion}</p>
-                      <p className="text-xs text-slate-400 flex items-center gap-1 flex-wrap">
+                      <p className="font-medium text-slate-800 dark:text-slate-100 text-sm truncate">{item.descripcion}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1 flex-wrap">
                         {new Date(item.fecha + "T12:00:00").toLocaleDateString("es-CR")}
-                        {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px]">Material</span>}
-                        {item.tipo === "activo"   && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px]">Activo</span>}
-                        {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px]">Retiro</span>}
-                        {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px]">{item.categorias_gastos.nombre}</span>}
+                        {item.tipo === "material" && <span className="bg-amber-100 text-amber-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-amber-900/40 dark:text-amber-400">Material</span>}
+                        {item.tipo === "activo"   && <span className="bg-purple-100 text-purple-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-purple-900/40 dark:text-purple-300">Activo</span>}
+                        {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-green-900/40 dark:text-green-300">Retiro</span>}
+                        {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] dark:bg-slate-700 dark:text-slate-400">{item.categorias_gastos.nombre}</span>}
                         {item.factura_url && (
                           <button onClick={() => setViendoFactura(item.factura_url)}
-                            className="text-blue-400 hover:text-blue-600 text-[10px]">📄 Ver factura</button>
+                            className="text-blue-400 hover:text-blue-600 text-[10px] dark:hover:text-blue-300">📄 Ver factura</button>
                         )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-red-500 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
-                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs">✕</button>
+                      <p className="font-bold text-red-500 dark:text-red-400 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
+                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs dark:text-slate-600">✕</button>
                     </div>
                   </div>
                 ))}
