@@ -11,6 +11,7 @@ import {
 } from '../utils/pdfReports';
 import { generarReporteTributarioExcel } from '../utils/xlsxReports';
 import ReportePreview from '../components/ReportePreview';
+import { totalComprasAnio, estadoLimiteRegimen } from '../utils/limiteRegimenSimplificado';
 
 const MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -82,7 +83,7 @@ export default function Reportes() {
   const obtenerPerfil = async (userId) => {
     const { data } = await supabase
       .from('perfiles')
-      .select('nombre_negocio, nombre_propietario, actividad_economica, moneda, color_principal, logo_url')
+      .select('nombre_negocio, nombre_propietario, actividad_economica, moneda, color_principal, logo_url, salario_base_vigente')
       .eq('id', userId)
       .single();
     return data;
@@ -250,6 +251,15 @@ export default function Reportes() {
 
       const conFoto = compras.filter((c) => c.factura_url).length;
 
+      // Límite anual del Régimen Simplificado: 186 salarios base en compras del año calendario en curso
+      const anioActual = hoy.getFullYear();
+      const totalComprasAnual = await totalComprasAnio(user.id, anioActual);
+      const limiteRegimen = {
+        anio: anioActual,
+        total: totalComprasAnual,
+        ...estadoLimiteRegimen(totalComprasAnual, perfil?.salario_base_vigente),
+      };
+
       setDatosPreview({
         perfil,
         trimestreLabel: etiquetaTrimestre(trimestreSel),
@@ -265,6 +275,7 @@ export default function Reportes() {
         totalesPorProveedor: Array.from(porProveedor.entries()).map(([proveedor, monto]) => ({ proveedor, monto })),
         conFoto,
         sinFoto: cantidadCompras - conFoto,
+        limiteRegimen,
         detalle: compras.map((c) => ({
           fecha: c.fecha,
           proveedor: c.proveedor,
