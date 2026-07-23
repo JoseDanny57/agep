@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import {
   trimestreDeFecha,
   rangoTrimestre,
-  etiquetaTrimestre,
+  etiquetaTrimestreConRango,
   getOrCreatePeriodo,
 } from '../utils/tributario';
 
@@ -37,7 +37,7 @@ function ToggleDeclarado({ declarado, onChange, disabled }) {
 function TarjetaPeriodo({ periodo, color, guardando, onCambiarFecha, onToggleDeclarado, onVerReporte }) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm space-y-3">
-      <p className="font-semibold text-slate-800 dark:text-slate-100">{etiquetaTrimestre(periodo)}</p>
+      <p className="font-semibold text-slate-800 dark:text-slate-100">{etiquetaTrimestreConRango(periodo)}</p>
 
       <div>
         <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Fecha límite</label>

@@ -12,7 +12,7 @@ import {
 import { generarReporteTributarioExcel } from '../utils/xlsxReports';
 import ReportePreview from '../components/ReportePreview';
 import { totalComprasAnio, estadoLimiteRegimen } from '../utils/limiteRegimenSimplificado';
-import { trimestreDeFecha, rangoTrimestre, etiquetaTrimestre, getOrCreatePeriodo } from '../utils/tributario';
+import { trimestreDeFecha, rangoTrimestre, etiquetaTrimestreConRango, getOrCreatePeriodo } from '../utils/tributario';
 
 const MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -257,7 +257,7 @@ export default function Reportes({ reporteTributarioPreset, limpiarReporteTribut
 
       setDatosPreview({
         perfil,
-        trimestreLabel: etiquetaTrimestre(trimestreSel),
+        trimestreLabel: etiquetaTrimestreConRango(trimestreSel),
         fechaEmision: new Date().toLocaleDateString('es-CR'),
         fechaLimite: periodoTributario.fecha_limite,
         declarado: periodoTributario.declarado,
@@ -485,7 +485,7 @@ export default function Reportes({ reporteTributarioPreset, limpiarReporteTribut
           >
             {trimestresDisponibles.map((t) => (
               <option key={`${t.anio}-${t.trimestre}`} value={`${t.anio}-${t.trimestre}`}>
-                {etiquetaTrimestre(t)}
+                {etiquetaTrimestreConRango(t)}
               </option>
             ))}
           </select>
