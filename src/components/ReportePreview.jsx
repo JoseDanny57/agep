@@ -307,6 +307,8 @@ function VistaTributario({ datos, moneda, color }) {
   const {
     perfil,
     fechaEmision,
+    fechaLimite,
+    declarado,
     totalCompras = 0,
     cantidadCompras = 0,
     proveedoresDistintos = 0,
@@ -325,6 +327,13 @@ function VistaTributario({ datos, moneda, color }) {
       <div style={estilos.infoTrimestre}>
         <div><strong>Actividad económica:</strong> {perfil?.actividad_economica || '—'}</div>
         <div><strong>Fecha de emisión:</strong> {fechaEmision}</div>
+        <div><strong>Fecha límite de declaración:</strong> {formatearFecha(fechaLimite)}</div>
+        <div>
+          <strong>Estado:</strong>{' '}
+          <span style={{ color: declarado ? '#00823c' : '#946c00', fontWeight: 700 }}>
+            {declarado ? 'Declarado' : 'Pendiente'}
+          </span>
+        </div>
       </div>
 
       {limiteRegimen && <LimiteRegimenBox limiteRegimen={limiteRegimen} moneda={moneda} />}

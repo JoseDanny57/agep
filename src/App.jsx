@@ -13,6 +13,7 @@ import Servicios from "./pages/Servicios";
 import CapitalInicial from "./pages/CapitalInicial";
 import Costeo from "./pages/Costeo";
 import Estadisticas from "./pages/Estadisticas";
+import CentroTributario from "./pages/CentroTributario";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
@@ -27,6 +28,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [pedidoInicialId, setPedidoInicialId] = useState(null);
+  const [reporteTributarioPreset, setReporteTributarioPreset] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
   const splashMostrado = useRef(false);
 
@@ -126,6 +128,7 @@ export default function App() {
     capital: CapitalInicial,
     costeo: Costeo,
     estadisticas: Estadisticas,
+    centroTributario: CentroTributario,
     reportes: Reportes,
     configuracion: Configuracion
   };
@@ -134,6 +137,11 @@ export default function App() {
   function irAPedido(id) {
     setPedidoInicialId(id);
     setPage("pedidos");
+  }
+
+  function irAReporteTributario(anio, trimestre) {
+    setReporteTributarioPreset({ anio, trimestre });
+    setPage("reportes");
   }
 
   return (
@@ -146,6 +154,9 @@ export default function App() {
         pedidoInicialId={pedidoInicialId}
         limpiarPedidoInicial={() => setPedidoInicialId(null)}
         onSeleccionarPedido={irAPedido}
+        onVerReporteTributario={irAReporteTributario}
+        reporteTributarioPreset={reporteTributarioPreset}
+        limpiarReporteTributarioPreset={() => setReporteTributarioPreset(null)}
       />
     </Layout>
   );

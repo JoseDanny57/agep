@@ -365,6 +365,8 @@ export async function generarReporteTributario(datos) {
     perfil,
     trimestreLabel,
     fechaEmision,
+    fechaLimite,
+    declarado,
     totalCompras = 0,
     cantidadCompras = 0,
     proveedoresDistintos = 0,
@@ -389,8 +391,17 @@ export async function generarReporteTributario(datos) {
   doc.setTextColor(80);
   doc.text(`Actividad económica: ${perfil?.actividad_economica || '—'}`, 14, y);
   doc.text(`Fecha de emisión: ${fechaEmision}`, 14, y + 5);
+  doc.text(
+    `Fecha límite de declaración: ${fechaLimite ? new Date(fechaLimite + 'T12:00:00').toLocaleDateString('es-CR') : '—'}`,
+    14,
+    y + 10
+  );
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...(declarado ? [0, 130, 60] : [148, 108, 0]));
+  doc.text(`Estado: ${declarado ? 'Declarado' : 'Pendiente'}`, 14, y + 15);
+  doc.setFont(undefined, 'normal');
   doc.setTextColor(0);
-  y += 12;
+  y += 22;
 
   doc.autoTable({
     startY: y,

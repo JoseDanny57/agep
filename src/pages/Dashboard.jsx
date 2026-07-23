@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { calcularSaldoPendiente } from "../utils/saldoPedido";
 import { ultimosNMeses, cargarDatosMensuales } from "../utils/estadisticas";
 import { totalComprasAnio, estadoLimiteRegimen } from "../utils/limiteRegimenSimplificado";
+import { trimestreDeFecha, etiquetaTrimestre, diasRestantes, nivelPlazo, getOrCreatePeriodo } from "../utils/tributario";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -36,6 +37,7 @@ export default function Dashboard({ perfil, userId, setPage }) {
   const [limiteRegimen, setLimiteRegimen] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [loadingHistorico, setLoadingHistorico] = useState(true);
+  const [periodoTributario, setPeriodoTributario] = useState(null);
   const mes = getMes();
 
   useEffect(() => { cargar(); cargarHistorico(); }, []);
@@ -46,6 +48,14 @@ export default function Dashboard({ perfil, userId, setPage }) {
       setLimiteRegimen({ total: totalAnual, ...estadoLimiteRegimen(totalAnual, perfil?.salario_base_vigente) });
     })();
   }, [userId, perfil?.salario_base_vigente]);
+
+  useEffect(() => {
+    (async () => {
+      const { anio, trimestre } = trimestreDeFecha(new Date());
+      const periodo = await getOrCreatePeriodo(userId, anio, trimestre);
+      setPeriodoTributario(periodo);
+    })();
+  }, [userId]);
 
   async function cargarHistorico() {
     const data = await cargarDatosMensuales(userId, ultimosNMeses(6));
@@ -85,6 +95,14 @@ export default function Dashboard({ perfil, userId, setPage }) {
   const color = perfil?.color_principal || "#2E75B6";
   const moneda = perfil?.moneda || "CRC";
   const fondoDegradado = `linear-gradient(to bottom, ${aclararHex(color, 0.25)}, ${aclararHex(color, 0.97)})`;
+
+  const diasLimiteTributario = periodoTributario ? diasRestantes(periodoTributario.fecha_limite) : null;
+  const nivelTributario = diasLimiteTributario != null ? nivelPlazo(diasLimiteTributario) : null;
+  const NIVEL_TEXTO_TRIBUTARIO = {
+    verde: "text-green-600 dark:text-green-400",
+    amarillo: "text-amber-600 dark:text-amber-400",
+    rojo: "text-red-600 dark:text-red-400",
+  };
 
   if (loading) return <div className="text-center py-12 text-slate-400 dark:text-slate-500">Calculando...</div>;
 
@@ -163,6 +181,36 @@ export default function Dashboard({ perfil, userId, setPage }) {
           Ver más →
         </button>
       </div>
+
+      {/* Card Centro Tributario — trimestre actual, fecha límite y estado de declaración */}
+      {periodoTributario && (
+        <button onClick={() => setPage?.("centroTributario")}
+          className="w-full text-left bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🏛️</span>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">CENTRO TRIBUTARIO</p>
+            </div>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
+              {etiquetaTrimestre(trimestreDeFecha(new Date()))}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              Límite: {new Date(periodoTributario.fecha_limite + "T12:00:00").toLocaleDateString("es-CR")}
+              {" · "}
+              <span className={`font-semibold ${NIVEL_TEXTO_TRIBUTARIO[nivelTributario]}`}>
+                {diasLimiteTributario >= 0 ? `${diasLimiteTributario} días` : `Vencido hace ${Math.abs(diasLimiteTributario)} días`}
+              </span>
+            </p>
+          </div>
+          <span className={`text-xs font-semibold rounded-lg px-2 py-1 flex-shrink-0 ${
+            periodoTributario.declarado
+              ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300"
+              : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+          }`}>
+            {periodoTributario.declarado ? "Declarado" : "Pendiente"}
+          </span>
+        </button>
+      )}
 
       {/* Card estadísticas — mini gráfica de utilidad de los últimos 6 meses */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
