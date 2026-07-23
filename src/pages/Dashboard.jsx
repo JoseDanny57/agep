@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { calcularSaldoPendiente } from "../utils/saldoPedido";
 import { ultimosNMeses, cargarDatosMensuales } from "../utils/estadisticas";
 import { totalComprasAnio, estadoLimiteRegimen } from "../utils/limiteRegimenSimplificado";
-import { trimestreDeFecha, etiquetaTrimestre, diasRestantes, nivelPlazo, getOrCreatePeriodo } from "../utils/tributario";
+import { trimestreDeFecha, etiquetaTrimestreConRango, diasRestantes, nivelPlazo, getOrCreatePeriodo } from "../utils/tributario";
 
 function fmt(monto, moneda) {
   if (moneda === "USD") return `$${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 2 })}`;
@@ -192,7 +192,7 @@ export default function Dashboard({ perfil, userId, setPage }) {
               <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">CENTRO TRIBUTARIO</p>
             </div>
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
-              {etiquetaTrimestre(trimestreDeFecha(new Date()))}
+              {etiquetaTrimestreConRango(trimestreDeFecha(new Date()))}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
               Límite: {new Date(periodoTributario.fecha_limite + "T12:00:00").toLocaleDateString("es-CR")}

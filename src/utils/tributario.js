@@ -34,6 +34,18 @@ export function etiquetaTrimestre({ anio, trimestre }) {
   return `${ROMANOS_TRIMESTRE[trimestre - 1]} Trimestre ${anio}`;
 }
 
+// Formatea una fecha 'YYYY-MM-DD' como DD/MM/AA
+function formatearFechaCorta(fechaISO) {
+  const [anio, mes, dia] = fechaISO.split('-');
+  return `${dia}/${mes}/${anio.slice(-2)}`;
+}
+
+// Etiqueta del trimestre junto con su rango de fechas, ej: "III Trimestre 2026 (01/07/26 al 30/09/26)"
+export function etiquetaTrimestreConRango({ anio, trimestre }) {
+  const { inicio, fin } = rangoTrimestre(anio, trimestre);
+  return `${etiquetaTrimestre({ anio, trimestre })} (${formatearFechaCorta(inicio)} al ${formatearFechaCorta(fin)})`;
+}
+
 // Días restantes hasta la fecha límite (negativo si ya venció)
 export function diasRestantes(fechaLimite) {
   const hoy = new Date();

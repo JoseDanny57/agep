@@ -16,6 +16,10 @@ export const formatearMonto = (monto, moneda = 'CRC') => {
   })}`;
 };
 
+// Convierte una etiqueta (posiblemente con espacios, paréntesis o barras) en un nombre de archivo seguro
+export const sanitizarNombreArchivo = (texto) =>
+  texto.replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_+|_+$/g, '');
+
 const MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
@@ -501,5 +505,5 @@ export async function generarReporteTributario(datos) {
   });
 
   dibujarPie(doc);
-  doc.save(`Reporte_Tributario_${trimestreLabel.replace(/\s+/g, '_')}.pdf`);
+  doc.save(`Reporte_Tributario_${sanitizarNombreArchivo(trimestreLabel)}.pdf`);
 }

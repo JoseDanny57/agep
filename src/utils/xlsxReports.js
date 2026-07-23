@@ -2,7 +2,7 @@
 // AGEP — Exportación a Excel (.xlsx) de reportes, usando SheetJS (xlsx)
 
 import * as XLSX from 'xlsx';
-import { formatearMonto } from './pdfReports';
+import { formatearMonto, sanitizarNombreArchivo } from './pdfReports';
 
 // ─────────────────────────────────────────────
 // Reporte Tributario Trimestral — Régimen Simplificado
@@ -87,5 +87,5 @@ export function generarReporteTributarioExcel(datos) {
   XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
   XLSX.utils.book_append_sheet(wb, wsDetalle, 'Detalle');
 
-  XLSX.writeFile(wb, `Reporte_Tributario_${trimestreLabel.replace(/\s+/g, '_')}.xlsx`);
+  XLSX.writeFile(wb, `Reporte_Tributario_${sanitizarNombreArchivo(trimestreLabel)}.xlsx`);
 }
