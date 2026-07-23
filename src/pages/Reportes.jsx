@@ -12,29 +12,14 @@ import {
 import { generarReporteTributarioExcel } from '../utils/xlsxReports';
 import ReportePreview from '../components/ReportePreview';
 import { totalComprasAnio, estadoLimiteRegimen } from '../utils/limiteRegimenSimplificado';
+import { trimestreDeFecha, rangoTrimestre, etiquetaTrimestre, getOrCreatePeriodo } from '../utils/tributario';
 
 const MESES = [
   'Enero','Febrero','Marzo','Abril','Mayo','Junio',
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
 ];
 
-const ROMANOS_TRIMESTRE = ['I', 'II', 'III', 'IV'];
-
-const trimestreDeFecha = (fecha) => {
-  const d = new Date(fecha + 'T12:00:00');
-  return { anio: d.getFullYear(), trimestre: Math.floor(d.getMonth() / 3) + 1 };
-};
-
-const rangoTrimestre = (anio, trimestre) => {
-  const mesInicio = (trimestre - 1) * 3;
-  const inicio = `${anio}-${String(mesInicio + 1).padStart(2, '0')}-01`;
-  const fin = new Date(anio, mesInicio + 3, 0).toISOString().split('T')[0];
-  return { inicio, fin };
-};
-
-const etiquetaTrimestre = (t) => `${ROMANOS_TRIMESTRE[t.trimestre - 1]} Trimestre ${t.anio}`;
-
-export default function Reportes() {
+export default function Reportes({ reporteTributarioPreset, limpiarReporteTributarioPreset }) {
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
@@ -54,7 +39,7 @@ export default function Reportes() {
   // Trimestre tributario: por defecto el vigente, más los que tengan compras registradas
   const trimestreActual = trimestreDeFecha(hoy.toISOString().split('T')[0]);
   const [trimestresDisponibles, setTrimestresDisponibles] = useState([trimestreActual]);
-  const [trimestreSel, setTrimestreSel] = useState(trimestreActual);
+  const [trimestreSel, setTrimestreSel] = useState(reporteTributarioPreset || trimestreActual);
 
   useEffect(() => {
     (async () => {
@@ -72,12 +57,21 @@ export default function Reportes() {
         mapa.set(`${t.anio}-${t.trimestre}`, t);
       });
       mapa.set(`${trimestreActual.anio}-${trimestreActual.trimestre}`, trimestreActual);
+      if (reporteTributarioPreset) {
+        mapa.set(`${reporteTributarioPreset.anio}-${reporteTributarioPreset.trimestre}`, reporteTributarioPreset);
+      }
 
       const lista = Array.from(mapa.values()).sort(
         (a, b) => b.anio - a.anio || b.trimestre - a.trimestre
       );
       setTrimestresDisponibles(lista);
+
+      if (reporteTributarioPreset) {
+        setTrimestreSel(reporteTributarioPreset);
+        limpiarReporteTributarioPreset?.();
+      }
     })();
+    // Se ejecuta una sola vez al montar: toma el preset de navegación (si existe) en ese momento.
   }, []);
 
   const obtenerPerfil = async (userId) => {
@@ -213,6 +207,7 @@ export default function Reportes() {
       const perfil = await obtenerPerfil(user.id);
 
       const { inicio, fin } = rangoTrimestre(trimestreSel.anio, trimestreSel.trimestre);
+      const periodoTributario = await getOrCreatePeriodo(user.id, trimestreSel.anio, trimestreSel.trimestre);
 
       const { data: comprasData } = await supabase
         .from('gastos')
@@ -264,6 +259,8 @@ export default function Reportes() {
         perfil,
         trimestreLabel: etiquetaTrimestre(trimestreSel),
         fechaEmision: new Date().toLocaleDateString('es-CR'),
+        fechaLimite: periodoTributario.fecha_limite,
+        declarado: periodoTributario.declarado,
         totalCompras,
         cantidadCompras,
         proveedoresDistintos,
