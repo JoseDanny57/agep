@@ -247,6 +247,7 @@ export default function Gastos({ perfil, userId }) {
   function handleMaterialChange(e) {
     const val = e.target.value;
     if (val === NUEVO_MATERIAL) {
+      setNuevoMaterial(m => ({ ...m, nombre: form.descripcion.trim() }));
       setShowMaterialModal(true);
       return;
     }
