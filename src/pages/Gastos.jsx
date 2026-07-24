@@ -11,11 +11,14 @@ const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/we
 const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
 
 const NUEVA_CATEGORIA = "__nueva__";
+const NUEVO_MATERIAL = "__nuevo_material__";
+const UNIDADES = ["unidades", "metros", "kg", "litros", "gramos", "cm", "piezas"];
 const GASTOS_DRAFT_KEY = "agep_gastos_borrador";
 
 export default function Gastos({ perfil, userId }) {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [materiales, setMateriales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -28,6 +31,8 @@ export default function Gastos({ perfil, userId }) {
     numero_comprobante: "",
     tarifa_iva: "13",
     observaciones: "",
+    material_id: "",
+    cantidad: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingFactura, setUploadingFactura] = useState(false);
@@ -41,6 +46,9 @@ export default function Gastos({ perfil, userId }) {
   const [showCompraModal, setShowCompraModal] = useState(false);
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState("");
   const [guardandoCategoria, setGuardandoCategoria] = useState(false);
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [nuevoMaterial, setNuevoMaterial] = useState({ nombre: "", unidad: "unidades", costo_unitario: "", stock_minimo: "" });
+  const [guardandoMaterial, setGuardandoMaterial] = useState(false);
   const [avisoBorrador, setAvisoBorrador] = useState(false);
   const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
@@ -70,12 +78,14 @@ export default function Gastos({ perfil, userId }) {
   }
 
   async function cargar() {
-    const [{ data: g }, { data: c }] = await Promise.all([
+    const [{ data: g }, { data: c }, { data: m }] = await Promise.all([
       supabase.from("gastos").select("*, categorias_gastos(nombre)").eq("user_id", userId).order("fecha", { ascending: false }),
       supabase.from("categorias_gastos").select("*").eq("user_id", userId).order("nombre"),
+      supabase.from("materiales").select("*").eq("user_id", userId).order("nombre"),
     ]);
     setGastos(g || []);
     setCategorias(c || []);
+    setMateriales(m || []);
     setLoading(false);
   }
 
@@ -133,6 +143,8 @@ export default function Gastos({ perfil, userId }) {
       numero_comprobante: "",
       tarifa_iva: "13",
       observaciones: "",
+      material_id: "",
+      cantidad: "",
     });
     setFacturaUrl(null);
     setFacturaPreview(null);
@@ -154,15 +166,17 @@ export default function Gastos({ perfil, userId }) {
   }
 
   function seleccionarTipo(key) {
-    setForm(f => ({ ...f, tipo: key }));
+    setForm(f => ({ ...f, tipo: key, ...(key !== "material" ? { material_id: "", cantidad: "" } : {}) }));
     if (key === "material") setShowCompraModal(true);
   }
 
   const esCompra = form.tipo === "material" || form.tipo === "activo";
+  const esMaterial = form.tipo === "material";
   const faltanDatosCompra = esCompra && (!form.proveedor.trim() || !form.numero_comprobante.trim());
+  const faltanDatosMaterial = esMaterial && (!form.material_id || Number(form.cantidad) <= 0);
 
   async function guardar() {
-    if (!form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra) return;
+    if (!form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra || faltanDatosMaterial) return;
     setSaving(true);
     const camposCompra = esCompra
       ? {
@@ -172,7 +186,10 @@ export default function Gastos({ perfil, userId }) {
         observaciones: form.observaciones || null,
       }
       : {};
-    await supabase.from("gastos").insert({
+    const camposMaterial = esMaterial
+      ? { material_id: form.material_id, cantidad: Number(form.cantidad) }
+      : {};
+    const { error } = await supabase.from("gastos").insert({
       user_id: userId,
       descripcion: form.descripcion,
       monto: Number(form.monto),
@@ -180,8 +197,17 @@ export default function Gastos({ perfil, userId }) {
       tipo: form.tipo,
       categoria_id: form.categoria_id,
       ...camposCompra,
+      ...camposMaterial,
       ...(facturaUrl ? { factura_url: facturaUrl } : {}),
     });
+    if (!error && esMaterial) {
+      const { data: mat } = await supabase.from("materiales").select("stock_actual").eq("id", form.material_id).single();
+      if (mat) {
+        await supabase.from("materiales")
+          .update({ stock_actual: Number(mat.stock_actual) + Number(form.cantidad) })
+          .eq("id", form.material_id);
+      }
+    }
     resetForm();
     setSaving(false);
     cargar();
@@ -218,9 +244,55 @@ export default function Gastos({ perfil, userId }) {
     setShowCategoriaModal(false);
   }
 
+  function handleMaterialChange(e) {
+    const val = e.target.value;
+    if (val === NUEVO_MATERIAL) {
+      setShowMaterialModal(true);
+      return;
+    }
+    setForm(f => ({ ...f, material_id: val }));
+  }
+
+  function cancelarNuevoMaterial() {
+    setNuevoMaterial({ nombre: "", unidad: "unidades", costo_unitario: "", stock_minimo: "" });
+    setShowMaterialModal(false);
+  }
+
+  async function crearMaterial() {
+    if (!nuevoMaterial.nombre.trim() || !nuevoMaterial.unidad || !nuevoMaterial.costo_unitario) return;
+    setGuardandoMaterial(true);
+    const { data, error } = await supabase.from("materiales")
+      .insert({
+        user_id: userId,
+        nombre: nuevoMaterial.nombre.trim(),
+        unidad: nuevoMaterial.unidad,
+        costo_unitario: Number(nuevoMaterial.costo_unitario),
+        stock_minimo: Number(nuevoMaterial.stock_minimo) || 0,
+        stock_actual: 0,
+      })
+      .select().single();
+    setGuardandoMaterial(false);
+    if (error || !data) {
+      alert("Error al crear el material.");
+      return;
+    }
+    setMateriales(ms => [...ms, data].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+    setForm(f => ({ ...f, material_id: data.id }));
+    setNuevoMaterial({ nombre: "", unidad: "unidades", costo_unitario: "", stock_minimo: "" });
+    setShowMaterialModal(false);
+  }
+
   async function eliminar(id) {
     if (!confirm("¿Eliminar este gasto?")) return;
+    const gasto = gastos.find(g => g.id === id);
     await supabase.from("gastos").delete().eq("id", id);
+    if (gasto?.tipo === "material" && gasto.material_id) {
+      const { data: mat } = await supabase.from("materiales").select("stock_actual").eq("id", gasto.material_id).single();
+      if (mat) {
+        const nuevoStock = Math.max(Number(mat.stock_actual) - Number(gasto.cantidad || 0), 0);
+        await supabase.from("materiales").update({ stock_actual: nuevoStock }).eq("id", gasto.material_id);
+      }
+    }
     cargar();
   }
 
@@ -265,6 +337,56 @@ export default function Gastos({ perfil, userId }) {
                 className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
                 style={{ backgroundColor: color }}>
                 {guardandoCategoria ? "Guardando..." : "Guardar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal nuevo material */}
+      {showMaterialModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={cancelarNuevoMaterial}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Nuevo material</h3>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Nombre *</label>
+              <input autoFocus className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
+                placeholder="Ej: Tela algodón"
+                value={nuevoMaterial.nombre}
+                onChange={e => setNuevoMaterial(m => ({ ...m, nombre: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Unidad *</label>
+                <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                  value={nuevoMaterial.unidad} onChange={e => setNuevoMaterial(m => ({ ...m, unidad: e.target.value }))}>
+                  {UNIDADES.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Costo/unidad *</label>
+                <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
+                  placeholder="0"
+                  value={nuevoMaterial.costo_unitario}
+                  onChange={e => setNuevoMaterial(m => ({ ...m, costo_unitario: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Stock mínimo (opcional)</label>
+              <input type="number" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
+                placeholder="0"
+                value={nuevoMaterial.stock_minimo}
+                onChange={e => setNuevoMaterial(m => ({ ...m, stock_minimo: e.target.value }))} />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={cancelarNuevoMaterial}
+                className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
+                Cancelar
+              </button>
+              <button onClick={crearMaterial} disabled={guardandoMaterial || !nuevoMaterial.nombre.trim() || !nuevoMaterial.unidad || !nuevoMaterial.costo_unitario}
+                className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
+                style={{ backgroundColor: color }}>
+                {guardandoMaterial ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </div>
@@ -395,6 +517,25 @@ export default function Gastos({ perfil, userId }) {
 
           {(form.tipo === "material" || form.tipo === "activo") && (
             <div className="space-y-3 border-t border-slate-100 dark:border-slate-700 pt-4">
+              {form.tipo === "material" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Material *</label>
+                    <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+                      value={form.material_id} onChange={handleMaterialChange}>
+                      <option value="">Seleccioná un material</option>
+                      {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                      <option value={NUEVO_MATERIAL}>+ Crear nuevo material</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Cantidad comprada *</label>
+                    <input type="number" min="0" step="any" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
+                      placeholder="0"
+                      value={form.cantidad} onChange={e => setForm(f => ({ ...f, cantidad: e.target.value }))} />
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Proveedor *</label>
@@ -472,7 +613,7 @@ export default function Gastos({ perfil, userId }) {
               className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">
               Cancelar
             </button>
-            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra}
+            <button onClick={guardar} disabled={saving || !form.descripcion || !form.monto || !form.categoria_id || faltanDatosCompra || faltanDatosMaterial}
               className="flex-1 text-white font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
               style={{ backgroundColor: color }}>
               {saving ? "Guardando..." : "Guardar"}
