@@ -19,7 +19,9 @@ import Configuracion from "./pages/Configuracion";
 import Layout from "./components/Layout";
 import Demo from "./pages/Demo";
 import AccesoVencido from "./components/AccesoVencido";
+import Mantenimiento from "./components/Mantenimiento";
 import { accesoVencido } from "./utils/accesoCuenta";
+import { ADMIN_EMAIL, mantenimientoActivo } from "./utils/mantenimiento";
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -30,6 +32,8 @@ export default function App() {
   const [pedidoInicialId, setPedidoInicialId] = useState(null);
   const [reporteTributarioPreset, setReporteTributarioPreset] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
+  const [mantenimientoHasta, setMantenimientoHasta] = useState(null);
+  const [mantenimientoCargado, setMantenimientoCargado] = useState(false);
   const splashMostrado = useRef(false);
 
   useEffect(() => {
@@ -50,6 +54,18 @@ export default function App() {
       }
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from("configuracion_sistema")
+      .select("mantenimiento_hasta")
+      .eq("id", 1)
+      .single()
+      .then(({ data }) => {
+        setMantenimientoHasta(data?.mantenimiento_hasta ?? null);
+        setMantenimientoCargado(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -77,7 +93,7 @@ export default function App() {
     return <Demo onExitDemo={() => setIsDemo(false)} />;
   }
 
-  if (loading) {
+  if (loading || (session && !mantenimientoCargado)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="text-center">
@@ -90,6 +106,7 @@ export default function App() {
 
   if (!session) return <Login onDemoClick={() => setIsDemo(true)} />;
   if (!perfil) return <Onboarding onComplete={(p) => setPerfil(p)} userId={session.user.id} />;
+  if (session.user.email !== ADMIN_EMAIL && mantenimientoActivo(mantenimientoHasta)) return <Mantenimiento />;
   if (accesoVencido(perfil)) return <AccesoVencido />;
 
   if (showSplash) {
