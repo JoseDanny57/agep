@@ -6,12 +6,14 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
-export default function Ingresos({ perfil, userId }) {
+export default function Ingresos({ perfil, userId, onSeleccionarPedido }) {
   const [ingresos, setIngresos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ descripcion: "", monto: "", fecha: new Date().toISOString().split("T")[0] });
   const [saving, setSaving] = useState(false);
+  const [detalle, setDetalle] = useState(null);
+  const [buscandoPedido, setBuscandoPedido] = useState(false);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
 
@@ -38,6 +40,16 @@ export default function Ingresos({ perfil, userId }) {
     if (!confirm("¿Eliminar este ingreso?")) return;
     await supabase.from("ingresos").delete().eq("id", id);
     cargar();
+  }
+
+  async function irAPedidoDeOrigen(pedidoPagoId) {
+    setBuscandoPedido(true);
+    const { data } = await supabase.from("pedido_pagos").select("pedido_id").eq("id", pedidoPagoId).single();
+    setBuscandoPedido(false);
+    if (data?.pedido_id) {
+      setDetalle(null);
+      onSeleccionarPedido?.(data.pedido_id);
+    }
   }
 
   const total = ingresos.reduce((s, r) => s + Number(r.monto), 0);
@@ -124,7 +136,8 @@ export default function Ingresos({ perfil, userId }) {
               </div>
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
+                  <div key={item.id} onClick={() => setDetalle(item)}
+                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                       style={{ backgroundColor: color + "20", color }}>💰</div>
                     <div className="flex-1 min-w-0">
@@ -136,7 +149,7 @@ export default function Ingresos({ perfil, userId }) {
                       {item.origen === "pedido" ? (
                         <span className="text-slate-300 dark:text-slate-600 text-xs" title="Este ingreso viene de un pago registrado en Pedidos. Editalo o eliminalo desde ahí.">🔒</span>
                       ) : (
-                        <button onClick={() => eliminar(item.id, item.origen)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-xs">✕</button>
+                        <button onClick={e => { e.stopPropagation(); eliminar(item.id, item.origen); }} className="text-slate-300 dark:text-slate-600 hover:text-red-400 text-xs">✕</button>
                       )}
                     </div>
                   </div>
@@ -145,6 +158,52 @@ export default function Ingresos({ perfil, userId }) {
             </div>
           );
         })
+      )}
+
+      {/* Modal detalle de ingreso (solo lectura) */}
+      {detalle && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDetalle(null)}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">Detalle del ingreso</h3>
+              <button onClick={() => setDetalle(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none">✕</button>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Descripción</p>
+                <p className="text-slate-800 dark:text-slate-100">{detalle.descripcion}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fecha</p>
+                  <p className="text-slate-800 dark:text-slate-100">{new Date(detalle.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Monto</p>
+                  <p className="font-bold text-green-600 dark:text-green-300">{fmt(detalle.monto, moneda)}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Origen</p>
+                <p className="text-slate-800 dark:text-slate-100">{detalle.origen === "pedido" ? "Pago de pedido" : "Ingreso manual"}</p>
+              </div>
+            </div>
+
+            {detalle.origen === "pedido" && (
+              <button onClick={() => irAPedidoDeOrigen(detalle.pedido_pago_id)} disabled={buscandoPedido}
+                className="w-full border-2 font-semibold rounded-xl py-2.5 text-sm hover:opacity-90 disabled:opacity-40"
+                style={{ borderColor: color, color }}>
+                {buscandoPedido ? "Buscando pedido..." : "Ver pedido de origen"}
+              </button>
+            )}
+
+            <button onClick={() => setDetalle(null)}
+              className="w-full border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
+              Cerrar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

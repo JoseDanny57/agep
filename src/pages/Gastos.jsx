@@ -7,6 +7,10 @@ function fmt(monto, moneda) {
   return `₡${Number(monto).toLocaleString("es-CR", { minimumFractionDigits: 0 })}`;
 }
 
+function esFacturaPdf(url) {
+  return /\.pdf(\?|$)/i.test(url || "");
+}
+
 const TIPOS_VALIDOS_FACTURA = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
 const MAX_SIZE_FACTURA = 5 * 1024 * 1024; // 5 MB
 
@@ -50,6 +54,7 @@ export default function Gastos({ perfil, userId }) {
   const [nuevoMaterial, setNuevoMaterial] = useState({ nombre: "", unidad: "unidades", costo_unitario: "", stock_minimo: "" });
   const [guardandoMaterial, setGuardandoMaterial] = useState(false);
   const [avisoBorrador, setAvisoBorrador] = useState(false);
+  const [detalle, setDetalle] = useState(null);
   const fileInputRef = useRef(null);
   const moneda = perfil?.moneda || "CRC";
   const color = perfil?.color_principal || "#2E75B6";
@@ -420,7 +425,7 @@ export default function Gastos({ perfil, userId }) {
 
       {/* Modal ver factura */}
       {viendoFactura && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setViendoFactura(null)}>
+        <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onClick={() => setViendoFactura(null)}>
           <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
             <button onClick={() => setViendoFactura(null)}
               className="absolute -top-10 right-0 text-white text-2xl font-bold">✕</button>
@@ -644,7 +649,8 @@ export default function Gastos({ perfil, userId }) {
               </div>
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {items.map((item, idx) => (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
+                  <div key={item.id} onClick={() => setDetalle(item)}
+                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 ${idx < items.length - 1 ? "border-b border-slate-50 dark:border-slate-700" : ""}`}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                       style={{ backgroundColor: tipoConfig[item.tipo]?.bg || "#fef2f2" }}>
                       {tipoConfig[item.tipo]?.emoji || "💸"}
@@ -658,14 +664,14 @@ export default function Gastos({ perfil, userId }) {
                         {item.tipo === "retiro"   && <span className="bg-green-100 text-green-600 rounded-full px-2 py-0.5 text-[10px] dark:bg-green-900/40 dark:text-green-300">Retiro</span>}
                         {item.categorias_gastos && <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] dark:bg-slate-700 dark:text-slate-400">{item.categorias_gastos.nombre}</span>}
                         {item.factura_url && (
-                          <button onClick={() => setViendoFactura(item.factura_url)}
+                          <button onClick={e => { e.stopPropagation(); setViendoFactura(item.factura_url); }}
                             className="text-blue-400 hover:text-blue-600 text-[10px] dark:hover:text-blue-300">📄 Ver factura</button>
                         )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-red-500 dark:text-red-400 text-sm whitespace-nowrap">{fmt(item.monto, moneda)}</p>
-                      <button onClick={() => eliminar(item.id)} className="text-slate-300 hover:text-red-400 text-xs dark:text-slate-600">✕</button>
+                      <button onClick={e => { e.stopPropagation(); eliminar(item.id); }} className="text-slate-300 hover:text-red-400 text-xs dark:text-slate-600">✕</button>
                     </div>
                   </div>
                 ))}
@@ -673,6 +679,108 @@ export default function Gastos({ perfil, userId }) {
             </div>
           );
         })
+      )}
+
+      {/* Modal detalle de gasto (solo lectura) */}
+      {detalle && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setDetalle(null)}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-5 space-y-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">Detalle del gasto</h3>
+              <button onClick={() => setDetalle(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none">✕</button>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Descripción</p>
+                <p className="text-slate-800 dark:text-slate-100">{detalle.descripcion}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fecha</p>
+                  <p className="text-slate-800 dark:text-slate-100">{new Date(detalle.fecha + "T12:00:00").toLocaleDateString("es-CR")}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Monto</p>
+                  <p className="font-bold text-red-500 dark:text-red-400">{fmt(detalle.monto, moneda)}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tipo</p>
+                  <p className="text-slate-800 dark:text-slate-100">{tipoConfig[detalle.tipo]?.label || detalle.tipo}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Categoría</p>
+                  <p className="text-slate-800 dark:text-slate-100">{detalle.categorias_gastos?.nombre || "—"}</p>
+                </div>
+              </div>
+
+              {detalle.tipo === "material" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Material</p>
+                    <p className="text-slate-800 dark:text-slate-100">{materiales.find(m => m.id === detalle.material_id)?.nombre || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Cantidad comprada</p>
+                    <p className="text-slate-800 dark:text-slate-100">{detalle.cantidad ?? "—"}</p>
+                  </div>
+                </div>
+              )}
+
+              {(detalle.proveedor || detalle.numero_comprobante) && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Proveedor</p>
+                    <p className="text-slate-800 dark:text-slate-100">{detalle.proveedor || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">N.° de comprobante</p>
+                    <p className="text-slate-800 dark:text-slate-100">{detalle.numero_comprobante || "—"}</p>
+                  </div>
+                </div>
+              )}
+
+              {detalle.tarifa_iva != null && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tarifa de IVA</p>
+                  <p className="text-slate-800 dark:text-slate-100">{detalle.tarifa_iva}%</p>
+                </div>
+              )}
+
+              {detalle.observaciones && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Observaciones</p>
+                  <p className="text-slate-800 dark:text-slate-100 whitespace-pre-wrap">{detalle.observaciones}</p>
+                </div>
+              )}
+
+              {detalle.factura_url && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Foto de factura</p>
+                  {esFacturaPdf(detalle.factura_url) ? (
+                    <a href={detalle.factura_url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-700">
+                      <span className="text-2xl">📄</span>
+                      <span className="text-sm text-slate-600 dark:text-slate-300 truncate">Ver factura (PDF)</span>
+                    </a>
+                  ) : (
+                    <img src={detalle.factura_url} alt="Factura" className="w-full h-32 object-contain rounded-xl border border-slate-200 bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900"
+                      onClick={() => setViendoFactura(detalle.factura_url)} />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <button onClick={() => setDetalle(null)}
+              className="w-full border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">
+              Cerrar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
