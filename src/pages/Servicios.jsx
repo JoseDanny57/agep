@@ -121,7 +121,7 @@ export default function Servicios({ perfil, userId }) {
       .limit(1);
     if (errPedidos) {
       alert("Error al verificar los pedidos asociados a este artículo.");
-      console.error(errPedidos);
+      console.error(errPedidos.message || errPedidos);
       return;
     }
     if (pedidosAsociados && pedidosAsociados.length > 0) {

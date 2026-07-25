@@ -163,6 +163,7 @@ export default function Pedidos({ perfil, userId, pedidoInicialId, limpiarPedido
       const { data: pedido, error } = await supabase.from("pedidos").insert({
         user_id: userId,
         cliente: form.cliente,
+        servicio_id: form.servicio_id || null,
         descripcion: form.descripcion,
         fecha_entrega: form.fecha_entrega || null,
         precio_venta: Number(form.precio_venta) || null,
