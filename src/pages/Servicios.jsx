@@ -114,6 +114,20 @@ export default function Servicios({ perfil, userId }) {
   }
 
   async function eliminar(id) {
+    const { data: pedidosAsociados, error: errPedidos } = await supabase
+      .from("pedidos")
+      .select("id")
+      .eq("servicio_id", id)
+      .limit(1);
+    if (errPedidos) {
+      alert("Error al verificar los pedidos asociados a este artículo.");
+      console.error(errPedidos);
+      return;
+    }
+    if (pedidosAsociados && pedidosAsociados.length > 0) {
+      alert("No se puede eliminar este artículo porque tiene pedidos asociados.");
+      return;
+    }
     if (!confirm("¿Eliminar este artículo del catálogo?")) return;
     await supabase.from("servicios").delete().eq("id", id);
     setServicioAbierto(null);
