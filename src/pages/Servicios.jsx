@@ -57,9 +57,6 @@ export default function Servicios({ perfil, userId }) {
     setItemsMaterial(items => items.map((item, i) => {
       if (i !== idx) return item;
       if (campo === "material_id") {
-        if (valor === "__manual__") {
-          return { ...item, material_id: "__manual__", nombre_material: "", costo_unitario: "" };
-        }
         const mat = materiales.find(m => m.id === valor);
         return mat
           ? { ...item, material_id: mat.id, nombre_material: mat.nombre, costo_unitario: mat.costo_unitario }
@@ -241,6 +238,7 @@ export default function Servicios({ perfil, userId }) {
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Materiales (opcional)</label>
               <button onClick={agregarMaterial} className="text-xs font-medium hover:opacity-80" style={{ color }}>+ Agregar</button>
             </div>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-2">¿No encontrás el material? Agregalo primero en Inventario mediante una compra en Gastos/Compras.</p>
 
             {itemsMaterial.map((item, idx) => (
               <div key={idx} className="flex gap-2 mb-2 items-start">
@@ -250,14 +248,7 @@ export default function Servicios({ perfil, userId }) {
                     onChange={e => actualizarMaterial(idx, "material_id", e.target.value)}>
                     <option value="">Seleccionar material...</option>
                     {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-                    <option value="__manual__">✏️ Ingresar manualmente</option>
                   </select>
-                  {item.material_id === "__manual__" && (
-                    <input className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
-                      placeholder="Nombre del material"
-                      value={item.nombre_material}
-                      onChange={e => actualizarMaterial(idx, "nombre_material", e.target.value)} />
-                  )}
                   <div className="grid grid-cols-2 gap-2">
                     <input type="number" className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500"
                       placeholder="Cantidad"
