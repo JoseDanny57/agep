@@ -57,6 +57,26 @@ export default function Inventario({ perfil, userId }) {
   }
 
   async function eliminar(id) {
+    const [{ data: enRecetas, error: errRecetas }, { data: enPedidos, error: errPedidos }] = await Promise.all([
+      supabase.from("servicio_materiales").select("id").eq("material_id", id).limit(1),
+      supabase.from("pedido_materiales").select("id").eq("material_id", id).limit(1),
+    ]);
+    if (errRecetas || errPedidos) {
+      alert("Error al verificar el uso de este material.");
+      console.error((errRecetas || errPedidos).message || errRecetas || errPedidos);
+      return;
+    }
+
+    const usadoEnRecetas = enRecetas && enRecetas.length > 0;
+    const usadoEnPedidos = enPedidos && enPedidos.length > 0;
+    if (usadoEnRecetas || usadoEnPedidos) {
+      const motivos = [];
+      if (usadoEnRecetas) motivos.push("es parte de la receta de un artículo del catálogo");
+      if (usadoEnPedidos) motivos.push("está siendo usado en un pedido");
+      alert(`No se puede eliminar este material porque ${motivos.join(" y ")}.`);
+      return;
+    }
+
     if (!confirm("¿Eliminar este material?")) return;
     await supabase.from("materiales").delete().eq("id", id);
     cargar();
